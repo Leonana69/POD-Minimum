@@ -1,0 +1,1977 @@
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"eprintf.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.getIntLen,"ax",%progbits
+  20              		.align	1
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	getIntLen:
+  26              	.LVL0:
+  27              	.LFB1:
+  28              		.file 1 "Core/Src/eprintf.c"
+   1:Core/Src/eprintf.c **** /**
+   2:Core/Src/eprintf.c ****  *    ||          ____  _ __                           
+   3:Core/Src/eprintf.c ****  * +------+      / __ )(_) /_______________ _____  ___ 
+   4:Core/Src/eprintf.c ****  * | 0xBC |     / __  / / __/ ___/ ___/ __ `/_  / / _ \
+   5:Core/Src/eprintf.c ****  * +------+    / /_/ / / /_/ /__/ /  / /_/ / / /_/  __/
+   6:Core/Src/eprintf.c ****  *  ||  ||    /_____/_/\__/\___/_/   \__,_/ /___/\___/
+   7:Core/Src/eprintf.c ****  *
+   8:Core/Src/eprintf.c ****  * Crazyflie control firmware
+   9:Core/Src/eprintf.c ****  *
+  10:Core/Src/eprintf.c ****  * Copyright (c) 2012 Bitcraze AB
+  11:Core/Src/eprintf.c ****  *
+  12:Core/Src/eprintf.c ****  * eprintf.c: Memory-friendly ultra-limited embedded implementation of printf
+  13:Core/Src/eprintf.c ****  *
+  14:Core/Src/eprintf.c ****  * This implementation trades CPU cycle for data memory eficiency
+  15:Core/Src/eprintf.c ****  * (No malloc, no unecessary buffers, etc...)
+  16:Core/Src/eprintf.c ****  *
+  17:Core/Src/eprintf.c ****  * Functionality: Implements %s, %d, %x, %X and %f without print size settings.
+  18:Core/Src/eprintf.c ****  * The float handling is verry limited and without exponential notation (ie.
+  19:Core/Src/eprintf.c ****  * works good for number around 0 and within int32 value range).
+  20:Core/Src/eprintf.c ****  *
+  21:Core/Src/eprintf.c ****  * To use this printf a 'putc' function shall be implemented with the prototype
+  22:Core/Src/eprintf.c ****  * 'int putc(int)'. Then a macro calling eprintf can be created. For example:
+  23:Core/Src/eprintf.c ****  * int consolePutc(int c);
+  24:Core/Src/eprintf.c ****  * #define consolePrintf(FMT, ...) eprintf(consolePutc, FMT, ## __VA_ARGS__)
+  25:Core/Src/eprintf.c ****  */
+  26:Core/Src/eprintf.c **** #include "eprintf.h"
+  27:Core/Src/eprintf.c **** 
+  28:Core/Src/eprintf.c **** #include <stdarg.h>
+  29:Core/Src/eprintf.c **** #include <stdint.h>
+  30:Core/Src/eprintf.c **** #include <stdbool.h>
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 2
+
+
+  31:Core/Src/eprintf.c **** #include <ctype.h>
+  32:Core/Src/eprintf.c **** 
+  33:Core/Src/eprintf.c **** static const char digit[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+  34:Core/Src/eprintf.c ****                              'A', 'B', 'C', 'D', 'E', 'F'};
+  35:Core/Src/eprintf.c **** 
+  36:Core/Src/eprintf.c **** static int getIntLen (long int value) {
+  29              		.loc 1 36 39 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  34              		.loc 1 36 39 is_stmt 0 view .LVU1
+  35 0000 0346     		mov	r3, r0
+  37:Core/Src/eprintf.c ****   int l = 1;
+  36              		.loc 1 37 3 is_stmt 1 view .LVU2
+  37              	.LVL1:
+  38:Core/Src/eprintf.c ****   while (value > 9) {
+  38              		.loc 1 38 3 view .LVU3
+  37:Core/Src/eprintf.c ****   int l = 1;
+  39              		.loc 1 37 7 is_stmt 0 view .LVU4
+  40 0002 0120     		movs	r0, #1
+  41              	.LVL2:
+  42              		.loc 1 38 9 view .LVU5
+  43 0004 06E0     		b	.L2
+  44              	.LVL3:
+  45              	.L3:
+  39:Core/Src/eprintf.c ****     l++;
+  46              		.loc 1 39 5 is_stmt 1 view .LVU6
+  47              		.loc 1 39 6 is_stmt 0 view .LVU7
+  48 0006 0130     		adds	r0, r0, #1
+  49              	.LVL4:
+  40:Core/Src/eprintf.c ****     value /= 10;
+  50              		.loc 1 40 5 is_stmt 1 view .LVU8
+  51              		.loc 1 40 11 is_stmt 0 view .LVU9
+  52 0008 044A     		ldr	r2, .L4
+  53 000a 82FB0312 		smull	r1, r2, r2, r3
+  54 000e DB17     		asrs	r3, r3, #31
+  55              	.LVL5:
+  56              		.loc 1 40 11 view .LVU10
+  57 0010 C3EBA203 		rsb	r3, r3, r2, asr #2
+  58              	.LVL6:
+  59              	.L2:
+  38:Core/Src/eprintf.c ****   while (value > 9) {
+  60              		.loc 1 38 9 is_stmt 1 view .LVU11
+  61 0014 092B     		cmp	r3, #9
+  62 0016 F6DC     		bgt	.L3
+  41:Core/Src/eprintf.c ****   }
+  42:Core/Src/eprintf.c ****   return l;
+  63              		.loc 1 42 3 view .LVU12
+  43:Core/Src/eprintf.c **** }
+  64              		.loc 1 43 1 is_stmt 0 view .LVU13
+  65 0018 7047     		bx	lr
+  66              	.L5:
+  67 001a 00BF     		.align	2
+  68              	.L4:
+  69 001c 67666666 		.word	1717986919
+  70              		.cfi_endproc
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 3
+
+
+  71              	.LFE1:
+  73              		.global	__aeabi_uldivmod
+  74              		.section	.text.itoa10Unsigned,"ax",%progbits
+  75              		.align	1
+  76              		.syntax unified
+  77              		.thumb
+  78              		.thumb_func
+  80              	itoa10Unsigned:
+  81              	.LVL7:
+  82              	.LFB3:
+  44:Core/Src/eprintf.c **** 
+  45:Core/Src/eprintf.c **** int power(int a, int b) {
+  46:Core/Src/eprintf.c ****   int x = a;
+  47:Core/Src/eprintf.c ****   for (int i = 1; i < b; i++)
+  48:Core/Src/eprintf.c ****     x *= a;
+  49:Core/Src/eprintf.c ****   return x;
+  50:Core/Src/eprintf.c **** }
+  51:Core/Src/eprintf.c **** 
+  52:Core/Src/eprintf.c **** static int itoa10Unsigned(putc_t putcf, unsigned long long int num) {
+  83              		.loc 1 52 69 is_stmt 1 view -0
+  84              		.cfi_startproc
+  85              		@ args = 0, pretend = 0, frame = 0
+  86              		@ frame_needed = 0, uses_anonymous_args = 0
+  87              		.loc 1 52 69 is_stmt 0 view .LVU15
+  88 0000 2DE9F84F 		push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+  89              	.LCFI0:
+  90              		.cfi_def_cfa_offset 40
+  91              		.cfi_offset 3, -40
+  92              		.cfi_offset 4, -36
+  93              		.cfi_offset 5, -32
+  94              		.cfi_offset 6, -28
+  95              		.cfi_offset 7, -24
+  96              		.cfi_offset 8, -20
+  97              		.cfi_offset 9, -16
+  98              		.cfi_offset 10, -12
+  99              		.cfi_offset 11, -8
+ 100              		.cfi_offset 14, -4
+ 101 0004 8046     		mov	r8, r0
+ 102 0006 1F46     		mov	r7, r3
+  53:Core/Src/eprintf.c ****   int len = 0;
+ 103              		.loc 1 53 3 is_stmt 1 view .LVU16
+ 104              	.LVL8:
+  54:Core/Src/eprintf.c **** 
+  55:Core/Src/eprintf.c ****   if (num == 0) {
+ 105              		.loc 1 55 3 view .LVU17
+ 106              		.loc 1 55 6 is_stmt 0 view .LVU18
+ 107 0008 52EA0703 		orrs	r3, r2, r7
+ 108 000c 03D0     		beq	.L13
+ 109 000e 1646     		mov	r6, r2
+  56:Core/Src/eprintf.c ****     putcf('0');
+  57:Core/Src/eprintf.c ****     return 1;
+  58:Core/Src/eprintf.c ****   }
+  59:Core/Src/eprintf.c **** 
+  60:Core/Src/eprintf.c ****   unsigned long long int i = 1;
+ 110              		.loc 1 60 26 view .LVU19
+ 111 0010 0124     		movs	r4, #1
+ 112 0012 0025     		movs	r5, #0
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 4
+
+
+ 113 0014 0FE0     		b	.L7
+ 114              	.L13:
+  56:Core/Src/eprintf.c ****     putcf('0');
+ 115              		.loc 1 56 5 is_stmt 1 view .LVU20
+ 116 0016 3020     		movs	r0, #48
+ 117              	.LVL9:
+  56:Core/Src/eprintf.c ****     putcf('0');
+ 118              		.loc 1 56 5 is_stmt 0 view .LVU21
+ 119 0018 C047     		blx	r8
+ 120              	.LVL10:
+  57:Core/Src/eprintf.c ****   }
+ 121              		.loc 1 57 5 is_stmt 1 view .LVU22
+  57:Core/Src/eprintf.c ****   }
+ 122              		.loc 1 57 12 is_stmt 0 view .LVU23
+ 123 001a 4FF00109 		mov	r9, #1
+ 124 001e 35E0     		b	.L6
+ 125              	.LVL11:
+ 126              	.L9:
+  61:Core/Src/eprintf.c ****   while ((num / i) > 9)
+  62:Core/Src/eprintf.c ****     i *= 10L;
+ 127              		.loc 1 62 5 is_stmt 1 view .LVU24
+ 128              		.loc 1 62 7 is_stmt 0 view .LVU25
+ 129 0020 AB00     		lsls	r3, r5, #2
+ 130 0022 43EA9473 		orr	r3, r3, r4, lsr #30
+ 131 0026 4FEA840C 		lsl	ip, r4, #2
+ 132 002a 1CEB0404 		adds	r4, ip, r4
+ 133              	.LVL12:
+ 134              		.loc 1 62 7 view .LVU26
+ 135 002e 45EB0305 		adc	r5, r5, r3
+ 136 0032 2419     		adds	r4, r4, r4
+ 137 0034 6D41     		adcs	r5, r5, r5
+ 138              	.LVL13:
+ 139              	.L7:
+  61:Core/Src/eprintf.c ****   while ((num / i) > 9)
+ 140              		.loc 1 61 9 is_stmt 1 view .LVU27
+  61:Core/Src/eprintf.c ****   while ((num / i) > 9)
+ 141              		.loc 1 61 15 is_stmt 0 view .LVU28
+ 142 0036 2246     		mov	r2, r4
+ 143 0038 2B46     		mov	r3, r5
+ 144 003a 3046     		mov	r0, r6
+ 145 003c 3946     		mov	r1, r7
+ 146 003e FFF7FEFF 		bl	__aeabi_uldivmod
+ 147              	.LVL14:
+  61:Core/Src/eprintf.c ****   while ((num / i) > 9)
+ 148              		.loc 1 61 9 view .LVU29
+ 149 0042 0A28     		cmp	r0, #10
+ 150 0044 71F10003 		sbcs	r3, r1, #0
+ 151 0048 EAD2     		bcs	.L9
+  53:Core/Src/eprintf.c **** 
+ 152              		.loc 1 53 7 view .LVU30
+ 153 004a 4FF00009 		mov	r9, #0
+ 154              	.LVL15:
+ 155              	.L10:
+  63:Core/Src/eprintf.c **** 
+  64:Core/Src/eprintf.c ****   do {
+ 156              		.loc 1 64 3 is_stmt 1 discriminator 1 view .LVU31
+  65:Core/Src/eprintf.c ****     putcf(digit[(num / i) % 10L]);
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 5
+
+
+ 157              		.loc 1 65 5 discriminator 1 view .LVU32
+ 158              		.loc 1 65 22 is_stmt 0 discriminator 1 view .LVU33
+ 159 004e 2246     		mov	r2, r4
+ 160 0050 2B46     		mov	r3, r5
+ 161 0052 3046     		mov	r0, r6
+ 162 0054 3946     		mov	r1, r7
+ 163 0056 FFF7FEFF 		bl	__aeabi_uldivmod
+ 164              	.LVL16:
+ 165              		.loc 1 65 27 discriminator 1 view .LVU34
+ 166 005a 0A22     		movs	r2, #10
+ 167 005c 0023     		movs	r3, #0
+ 168 005e FFF7FEFF 		bl	__aeabi_uldivmod
+ 169              	.LVL17:
+ 170              		.loc 1 65 16 discriminator 1 view .LVU35
+ 171 0062 0C4B     		ldr	r3, .L14
+ 172 0064 1344     		add	r3, r3, r2
+ 173              		.loc 1 65 5 discriminator 1 view .LVU36
+ 174 0066 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 175 0068 C047     		blx	r8
+ 176              	.LVL18:
+  66:Core/Src/eprintf.c ****     len++;
+ 177              		.loc 1 66 5 is_stmt 1 discriminator 1 view .LVU37
+ 178              		.loc 1 66 8 is_stmt 0 discriminator 1 view .LVU38
+ 179 006a 09F10109 		add	r9, r9, #1
+ 180              	.LVL19:
+  67:Core/Src/eprintf.c ****   } while (i /= 10L);
+ 181              		.loc 1 67 11 is_stmt 1 discriminator 1 view .LVU39
+ 182 006e A346     		mov	fp, r4
+ 183 0070 AA46     		mov	r10, r5
+ 184              		.loc 1 67 14 is_stmt 0 discriminator 1 view .LVU40
+ 185 0072 0A22     		movs	r2, #10
+ 186 0074 0023     		movs	r3, #0
+ 187 0076 2046     		mov	r0, r4
+ 188 0078 2946     		mov	r1, r5
+ 189 007a FFF7FEFF 		bl	__aeabi_uldivmod
+ 190              	.LVL20:
+ 191 007e 0446     		mov	r4, r0
+ 192              	.LVL21:
+ 193              		.loc 1 67 14 discriminator 1 view .LVU41
+ 194 0080 0D46     		mov	r5, r1
+ 195              	.LVL22:
+ 196              		.loc 1 67 3 discriminator 1 view .LVU42
+ 197 0082 BBF10A0F 		cmp	fp, #10
+ 198 0086 7AF10003 		sbcs	r3, r10, #0
+ 199 008a E0D2     		bcs	.L10
+ 200              	.LVL23:
+ 201              	.L6:
+  68:Core/Src/eprintf.c **** 
+  69:Core/Src/eprintf.c ****   return len;
+  70:Core/Src/eprintf.c **** }
+ 202              		.loc 1 70 1 view .LVU43
+ 203 008c 4846     		mov	r0, r9
+ 204 008e BDE8F88F 		pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 205              	.LVL24:
+ 206              	.L15:
+ 207              		.loc 1 70 1 view .LVU44
+ 208 0092 00BF     		.align	2
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 6
+
+
+ 209              	.L14:
+ 210 0094 00000000 		.word	.LANCHOR0
+ 211              		.cfi_endproc
+ 212              	.LFE3:
+ 214              		.section	.text.itoa10,"ax",%progbits
+ 215              		.align	1
+ 216              		.syntax unified
+ 217              		.thumb
+ 218              		.thumb_func
+ 220              	itoa10:
+ 221              	.LVL25:
+ 222              	.LFB4:
+  71:Core/Src/eprintf.c **** 
+  72:Core/Src/eprintf.c **** static int itoa10(putc_t putcf, long long int num, int precision) {
+ 223              		.loc 1 72 67 is_stmt 1 view -0
+ 224              		.cfi_startproc
+ 225              		@ args = 4, pretend = 0, frame = 0
+ 226              		@ frame_needed = 0, uses_anonymous_args = 0
+ 227              		.loc 1 72 67 is_stmt 0 view .LVU46
+ 228 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 229              	.LCFI1:
+ 230              		.cfi_def_cfa_offset 24
+ 231              		.cfi_offset 4, -24
+ 232              		.cfi_offset 5, -20
+ 233              		.cfi_offset 6, -16
+ 234              		.cfi_offset 7, -12
+ 235              		.cfi_offset 8, -8
+ 236              		.cfi_offset 14, -4
+ 237 0004 0546     		mov	r5, r0
+ 238 0006 1446     		mov	r4, r2
+  73:Core/Src/eprintf.c ****   int len = 0;
+ 239              		.loc 1 73 3 is_stmt 1 view .LVU47
+ 240              	.LVL26:
+  74:Core/Src/eprintf.c **** 
+  75:Core/Src/eprintf.c ****   if (num == 0) {
+ 241              		.loc 1 75 3 view .LVU48
+ 242              		.loc 1 75 6 is_stmt 0 view .LVU49
+ 243 0008 54EA0302 		orrs	r2, r4, r3
+ 244              	.LVL27:
+ 245              		.loc 1 75 6 view .LVU50
+ 246 000c 0CD0     		beq	.L25
+  76:Core/Src/eprintf.c ****     putcf('0');
+  77:Core/Src/eprintf.c ****     return 1;
+  78:Core/Src/eprintf.c ****   }
+  79:Core/Src/eprintf.c **** 
+  80:Core/Src/eprintf.c ****   long long unsigned int n = num;
+ 247              		.loc 1 80 3 is_stmt 1 view .LVU51
+ 248              		.loc 1 80 26 is_stmt 0 view .LVU52
+ 249 000e 2746     		mov	r7, r4
+ 250 0010 9846     		mov	r8, r3
+ 251              	.LVL28:
+  81:Core/Src/eprintf.c ****   if (num < 0) {
+ 252              		.loc 1 81 3 is_stmt 1 view .LVU53
+ 253              		.loc 1 81 6 is_stmt 0 view .LVU54
+ 254 0012 002B     		cmp	r3, #0
+ 255 0014 0CDB     		blt	.L26
+  73:Core/Src/eprintf.c **** 
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 7
+
+
+ 256              		.loc 1 73 7 view .LVU55
+ 257 0016 0026     		movs	r6, #0
+ 258              	.LVL29:
+ 259              	.L19:
+  82:Core/Src/eprintf.c ****     n = -num;
+  83:Core/Src/eprintf.c ****     putcf('-');
+  84:Core/Src/eprintf.c ****     len++;
+  85:Core/Src/eprintf.c ****   }
+  86:Core/Src/eprintf.c **** 
+  87:Core/Src/eprintf.c ****   int numLenght = getIntLen(num);
+ 260              		.loc 1 87 3 is_stmt 1 view .LVU56
+ 261              		.loc 1 87 19 is_stmt 0 view .LVU57
+ 262 0018 2046     		mov	r0, r4
+ 263 001a FFF7FEFF 		bl	getIntLen
+ 264              	.LVL30:
+  88:Core/Src/eprintf.c ****   if (numLenght < precision) {
+ 265              		.loc 1 88 3 is_stmt 1 view .LVU58
+ 266              		.loc 1 88 6 is_stmt 0 view .LVU59
+ 267 001e 069B     		ldr	r3, [sp, #24]
+ 268 0020 9842     		cmp	r0, r3
+ 269 0022 12DA     		bge	.L20
+ 270              	.LBB2:
+  89:Core/Src/eprintf.c ****     int fillWithZero = precision - numLenght;
+ 271              		.loc 1 89 5 is_stmt 1 view .LVU60
+ 272              		.loc 1 89 9 is_stmt 0 view .LVU61
+ 273 0024 1C1A     		subs	r4, r3, r0
+ 274              	.LVL31:
+  90:Core/Src/eprintf.c ****     while (fillWithZero > 0) {
+ 275              		.loc 1 90 5 is_stmt 1 view .LVU62
+ 276              		.loc 1 90 11 is_stmt 0 view .LVU63
+ 277 0026 0EE0     		b	.L21
+ 278              	.LVL32:
+ 279              	.L25:
+ 280              		.loc 1 90 11 view .LVU64
+ 281              	.LBE2:
+  76:Core/Src/eprintf.c ****     return 1;
+ 282              		.loc 1 76 5 is_stmt 1 view .LVU65
+ 283 0028 3020     		movs	r0, #48
+ 284              	.LVL33:
+  76:Core/Src/eprintf.c ****     return 1;
+ 285              		.loc 1 76 5 is_stmt 0 view .LVU66
+ 286 002a A847     		blx	r5
+ 287              	.LVL34:
+  77:Core/Src/eprintf.c ****   }
+ 288              		.loc 1 77 5 is_stmt 1 view .LVU67
+  77:Core/Src/eprintf.c ****   }
+ 289              		.loc 1 77 12 is_stmt 0 view .LVU68
+ 290 002c 0120     		movs	r0, #1
+ 291 002e 12E0     		b	.L16
+ 292              	.LVL35:
+ 293              	.L26:
+  82:Core/Src/eprintf.c ****     putcf('-');
+ 294              		.loc 1 82 5 is_stmt 1 view .LVU69
+  82:Core/Src/eprintf.c ****     putcf('-');
+ 295              		.loc 1 82 9 is_stmt 0 view .LVU70
+ 296 0030 6742     		negs	r7, r4
+  82:Core/Src/eprintf.c ****     putcf('-');
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 8
+
+
+ 297              		.loc 1 82 7 view .LVU71
+ 298 0032 63EB4308 		sbc	r8, r3, r3, lsl #1
+ 299              	.LVL36:
+  83:Core/Src/eprintf.c ****     len++;
+ 300              		.loc 1 83 5 is_stmt 1 view .LVU72
+ 301 0036 2D20     		movs	r0, #45
+ 302              	.LVL37:
+  83:Core/Src/eprintf.c ****     len++;
+ 303              		.loc 1 83 5 is_stmt 0 view .LVU73
+ 304 0038 A847     		blx	r5
+ 305              	.LVL38:
+  84:Core/Src/eprintf.c ****   }
+ 306              		.loc 1 84 5 is_stmt 1 view .LVU74
+  84:Core/Src/eprintf.c ****   }
+ 307              		.loc 1 84 8 is_stmt 0 view .LVU75
+ 308 003a 0126     		movs	r6, #1
+ 309 003c ECE7     		b	.L19
+ 310              	.LVL39:
+ 311              	.L22:
+ 312              	.LBB3:
+  91:Core/Src/eprintf.c ****       putcf('0');
+ 313              		.loc 1 91 7 is_stmt 1 view .LVU76
+ 314 003e 3020     		movs	r0, #48
+ 315 0040 A847     		blx	r5
+ 316              	.LVL40:
+  92:Core/Src/eprintf.c ****       len++;
+ 317              		.loc 1 92 7 view .LVU77
+ 318              		.loc 1 92 10 is_stmt 0 view .LVU78
+ 319 0042 0136     		adds	r6, r6, #1
+ 320              	.LVL41:
+  93:Core/Src/eprintf.c ****       fillWithZero--;
+ 321              		.loc 1 93 7 is_stmt 1 view .LVU79
+ 322              		.loc 1 93 19 is_stmt 0 view .LVU80
+ 323 0044 013C     		subs	r4, r4, #1
+ 324              	.LVL42:
+ 325              	.L21:
+  90:Core/Src/eprintf.c ****       putcf('0');
+ 326              		.loc 1 90 11 is_stmt 1 view .LVU81
+ 327 0046 002C     		cmp	r4, #0
+ 328 0048 F9DC     		bgt	.L22
+ 329              	.LVL43:
+ 330              	.L20:
+  90:Core/Src/eprintf.c ****       putcf('0');
+ 331              		.loc 1 90 11 is_stmt 0 view .LVU82
+ 332              	.LBE3:
+  94:Core/Src/eprintf.c ****     }
+  95:Core/Src/eprintf.c ****   }
+  96:Core/Src/eprintf.c **** 
+  97:Core/Src/eprintf.c ****   return itoa10Unsigned(putcf, n) + len;
+ 333              		.loc 1 97 3 is_stmt 1 view .LVU83
+ 334              		.loc 1 97 10 is_stmt 0 view .LVU84
+ 335 004a 3A46     		mov	r2, r7
+ 336 004c 4346     		mov	r3, r8
+ 337 004e 2846     		mov	r0, r5
+ 338 0050 FFF7FEFF 		bl	itoa10Unsigned
+ 339              	.LVL44:
+ 340              		.loc 1 97 35 view .LVU85
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 9
+
+
+ 341 0054 3044     		add	r0, r0, r6
+ 342              	.LVL45:
+ 343              	.L16:
+  98:Core/Src/eprintf.c **** }
+ 344              		.loc 1 98 1 view .LVU86
+ 345 0056 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 346              		.loc 1 98 1 view .LVU87
+ 347              		.cfi_endproc
+ 348              	.LFE4:
+ 350              		.section	.text.itoa16,"ax",%progbits
+ 351              		.align	1
+ 352              		.syntax unified
+ 353              		.thumb
+ 354              		.thumb_func
+ 356              	itoa16:
+ 357              	.LVL46:
+ 358              	.LFB5:
+  99:Core/Src/eprintf.c **** 
+ 100:Core/Src/eprintf.c **** static int itoa16(putc_t putcf, uint64_t num, int width, char padChar) {
+ 359              		.loc 1 100 72 is_stmt 1 view -0
+ 360              		.cfi_startproc
+ 361              		@ args = 8, pretend = 0, frame = 0
+ 362              		@ frame_needed = 0, uses_anonymous_args = 0
+ 363              		.loc 1 100 72 is_stmt 0 view .LVU89
+ 364 0000 2DE9F84F 		push	{r3, r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 365              	.LCFI2:
+ 366              		.cfi_def_cfa_offset 40
+ 367              		.cfi_offset 3, -40
+ 368              		.cfi_offset 4, -36
+ 369              		.cfi_offset 5, -32
+ 370              		.cfi_offset 6, -28
+ 371              		.cfi_offset 7, -24
+ 372              		.cfi_offset 8, -20
+ 373              		.cfi_offset 9, -16
+ 374              		.cfi_offset 10, -12
+ 375              		.cfi_offset 11, -8
+ 376              		.cfi_offset 14, -4
+ 377 0004 8146     		mov	r9, r0
+ 378 0006 9046     		mov	r8, r2
+ 379 0008 1F46     		mov	r7, r3
+ 380 000a DDF828B0 		ldr	fp, [sp, #40]
+ 381 000e 9DF82CA0 		ldrb	r10, [sp, #44]	@ zero_extendqisi2
+ 101:Core/Src/eprintf.c ****   int len = 0;
+ 382              		.loc 1 101 3 is_stmt 1 view .LVU90
+ 383              	.LVL47:
+ 102:Core/Src/eprintf.c ****   bool foundFirst = false;
+ 384              		.loc 1 102 3 view .LVU91
+ 103:Core/Src/eprintf.c **** 
+ 104:Core/Src/eprintf.c ****   for (int i = 15; i >= 0; i--) {
+ 385              		.loc 1 104 3 view .LVU92
+ 386              	.LBB4:
+ 387              		.loc 1 104 8 view .LVU93
+ 388              		.loc 1 104 12 is_stmt 0 view .LVU94
+ 389 0012 0F24     		movs	r4, #15
+ 390              	.LBE4:
+ 102:Core/Src/eprintf.c ****   bool foundFirst = false;
+ 391              		.loc 1 102 8 view .LVU95
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 10
+
+
+ 392 0014 0025     		movs	r5, #0
+ 101:Core/Src/eprintf.c ****   bool foundFirst = false;
+ 393              		.loc 1 101 7 view .LVU96
+ 394 0016 2E46     		mov	r6, r5
+ 395              	.LBB7:
+ 396              		.loc 1 104 3 view .LVU97
+ 397 0018 06E0     		b	.L28
+ 398              	.LVL48:
+ 399              	.L34:
+ 400              	.LBB5:
+ 105:Core/Src/eprintf.c ****     int shift = i * 4;
+ 106:Core/Src/eprintf.c ****     uint64_t mask = (uint64_t)0x0F << shift;
+ 107:Core/Src/eprintf.c ****     uint64_t val = (num & mask) >> shift;
+ 108:Core/Src/eprintf.c **** 
+ 109:Core/Src/eprintf.c ****     if (val > 0)
+ 110:Core/Src/eprintf.c ****       foundFirst = true;
+ 401              		.loc 1 110 18 view .LVU98
+ 402 001a 0125     		movs	r5, #1
+ 403              	.LVL49:
+ 404              	.L29:
+ 111:Core/Src/eprintf.c **** 
+ 112:Core/Src/eprintf.c ****     if (foundFirst || i < width) {
+ 113:Core/Src/eprintf.c ****       if (foundFirst)
+ 405              		.loc 1 113 7 is_stmt 1 view .LVU99
+ 406              		.loc 1 113 10 is_stmt 0 view .LVU100
+ 407 001c 4DB3     		cbz	r5, .L31
+ 114:Core/Src/eprintf.c ****         putcf(digit[val]);
+ 408              		.loc 1 114 9 is_stmt 1 view .LVU101
+ 409 001e 184A     		ldr	r2, .L37
+ 410 0020 D05C     		ldrb	r0, [r2, r3]	@ zero_extendqisi2
+ 411 0022 C847     		blx	r9
+ 412              	.LVL50:
+ 413              	.L32:
+ 115:Core/Src/eprintf.c ****       else
+ 116:Core/Src/eprintf.c ****         putcf(padChar);
+ 117:Core/Src/eprintf.c ****       len++;
+ 414              		.loc 1 117 7 view .LVU102
+ 415              		.loc 1 117 10 is_stmt 0 view .LVU103
+ 416 0024 0136     		adds	r6, r6, #1
+ 417              	.LVL51:
+ 418              	.L30:
+ 419              		.loc 1 117 10 view .LVU104
+ 420              	.LBE5:
+ 104:Core/Src/eprintf.c ****     int shift = i * 4;
+ 421              		.loc 1 104 28 is_stmt 1 discriminator 2 view .LVU105
+ 104:Core/Src/eprintf.c ****     int shift = i * 4;
+ 422              		.loc 1 104 29 is_stmt 0 discriminator 2 view .LVU106
+ 423 0026 013C     		subs	r4, r4, #1
+ 424              	.LVL52:
+ 425              	.L28:
+ 104:Core/Src/eprintf.c ****     int shift = i * 4;
+ 426              		.loc 1 104 20 is_stmt 1 discriminator 1 view .LVU107
+ 104:Core/Src/eprintf.c ****     int shift = i * 4;
+ 427              		.loc 1 104 3 is_stmt 0 discriminator 1 view .LVU108
+ 428 0028 002C     		cmp	r4, #0
+ 429 002a 25DB     		blt	.L36
+ 430              	.LBB6:
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 11
+
+
+ 105:Core/Src/eprintf.c ****     uint64_t mask = (uint64_t)0x0F << shift;
+ 431              		.loc 1 105 5 is_stmt 1 view .LVU109
+ 105:Core/Src/eprintf.c ****     uint64_t mask = (uint64_t)0x0F << shift;
+ 432              		.loc 1 105 9 is_stmt 0 view .LVU110
+ 433 002c A100     		lsls	r1, r4, #2
+ 434              	.LVL53:
+ 106:Core/Src/eprintf.c ****     uint64_t val = (num & mask) >> shift;
+ 435              		.loc 1 106 5 is_stmt 1 view .LVU111
+ 106:Core/Src/eprintf.c ****     uint64_t val = (num & mask) >> shift;
+ 436              		.loc 1 106 14 is_stmt 0 view .LVU112
+ 437 002e 0F23     		movs	r3, #15
+ 438 0030 A1F12002 		sub	r2, r1, #32
+ 439 0034 C1F12000 		rsb	r0, r1, #32
+ 440 0038 03FA02F2 		lsl	r2, r3, r2
+ 441 003c 23FA00F0 		lsr	r0, r3, r0
+ 442 0040 0243     		orrs	r2, r2, r0
+ 443 0042 8B40     		lsls	r3, r3, r1
+ 444              	.LVL54:
+ 107:Core/Src/eprintf.c **** 
+ 445              		.loc 1 107 5 is_stmt 1 view .LVU113
+ 107:Core/Src/eprintf.c **** 
+ 446              		.loc 1 107 25 is_stmt 0 view .LVU114
+ 447 0044 03EA0803 		and	r3, r3, r8
+ 448              	.LVL55:
+ 107:Core/Src/eprintf.c **** 
+ 449              		.loc 1 107 25 view .LVU115
+ 450 0048 3A40     		ands	r2, r2, r7
+ 451              	.LVL56:
+ 107:Core/Src/eprintf.c **** 
+ 452              		.loc 1 107 14 view .LVU116
+ 453 004a C1F1200C 		rsb	ip, r1, #32
+ 454 004e A1F12000 		sub	r0, r1, #32
+ 455              	.LVL57:
+ 107:Core/Src/eprintf.c **** 
+ 456              		.loc 1 107 14 view .LVU117
+ 457 0052 CB40     		lsrs	r3, r3, r1
+ 458 0054 02FA0CFC 		lsl	ip, r2, ip
+ 459              	.LVL58:
+ 107:Core/Src/eprintf.c **** 
+ 460              		.loc 1 107 14 view .LVU118
+ 461 0058 43EA0C03 		orr	r3, r3, ip
+ 462 005c 22FA00F0 		lsr	r0, r2, r0
+ 463              	.LVL59:
+ 107:Core/Src/eprintf.c **** 
+ 464              		.loc 1 107 14 view .LVU119
+ 465 0060 0343     		orrs	r3, r3, r0
+ 466 0062 CA40     		lsrs	r2, r2, r1
+ 467              	.LVL60:
+ 109:Core/Src/eprintf.c ****       foundFirst = true;
+ 468              		.loc 1 109 5 is_stmt 1 view .LVU120
+ 109:Core/Src/eprintf.c ****       foundFirst = true;
+ 469              		.loc 1 109 8 is_stmt 0 view .LVU121
+ 470 0064 1A43     		orrs	r2, r3, r2
+ 471              	.LVL61:
+ 109:Core/Src/eprintf.c ****       foundFirst = true;
+ 472              		.loc 1 109 8 view .LVU122
+ 473 0066 D8D1     		bne	.L34
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 12
+
+
+ 112:Core/Src/eprintf.c ****       if (foundFirst)
+ 474              		.loc 1 112 5 is_stmt 1 view .LVU123
+ 112:Core/Src/eprintf.c ****       if (foundFirst)
+ 475              		.loc 1 112 8 is_stmt 0 view .LVU124
+ 476 0068 002D     		cmp	r5, #0
+ 477 006a D7D1     		bne	.L29
+ 112:Core/Src/eprintf.c ****       if (foundFirst)
+ 478              		.loc 1 112 20 discriminator 1 view .LVU125
+ 479 006c 5C45     		cmp	r4, fp
+ 480 006e DADA     		bge	.L30
+ 481 0070 D4E7     		b	.L29
+ 482              	.LVL62:
+ 483              	.L31:
+ 116:Core/Src/eprintf.c ****       len++;
+ 484              		.loc 1 116 9 is_stmt 1 view .LVU126
+ 485 0072 5046     		mov	r0, r10
+ 486 0074 C847     		blx	r9
+ 487              	.LVL63:
+ 116:Core/Src/eprintf.c ****       len++;
+ 488              		.loc 1 116 9 is_stmt 0 view .LVU127
+ 489 0076 D5E7     		b	.L32
+ 490              	.LVL64:
+ 491              	.L36:
+ 116:Core/Src/eprintf.c ****       len++;
+ 492              		.loc 1 116 9 view .LVU128
+ 493              	.LBE6:
+ 494              	.LBE7:
+ 118:Core/Src/eprintf.c ****     }
+ 119:Core/Src/eprintf.c ****   }
+ 120:Core/Src/eprintf.c **** 
+ 121:Core/Src/eprintf.c ****   return len;
+ 495              		.loc 1 121 3 is_stmt 1 view .LVU129
+ 122:Core/Src/eprintf.c **** }
+ 496              		.loc 1 122 1 is_stmt 0 view .LVU130
+ 497 0078 3046     		mov	r0, r6
+ 498 007a BDE8F88F 		pop	{r3, r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 499              	.LVL65:
+ 500              	.L38:
+ 501              		.loc 1 122 1 view .LVU131
+ 502 007e 00BF     		.align	2
+ 503              	.L37:
+ 504 0080 00000000 		.word	.LANCHOR0
+ 505              		.cfi_endproc
+ 506              	.LFE5:
+ 508              		.section	.text.handleLongLong,"ax",%progbits
+ 509              		.align	1
+ 510              		.syntax unified
+ 511              		.thumb
+ 512              		.thumb_func
+ 514              	handleLongLong:
+ 515              	.LVL66:
+ 516              	.LFB6:
+ 123:Core/Src/eprintf.c **** 
+ 124:Core/Src/eprintf.c **** static int handleLongLong(putc_t putcf, const char** fmt, unsigned long long int val, int width, ch
+ 517              		.loc 1 124 112 is_stmt 1 view -0
+ 518              		.cfi_startproc
+ 519              		@ args = 8, pretend = 0, frame = 0
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 13
+
+
+ 520              		@ frame_needed = 0, uses_anonymous_args = 0
+ 521              		.loc 1 124 112 is_stmt 0 view .LVU133
+ 522 0000 30B5     		push	{r4, r5, lr}
+ 523              	.LCFI3:
+ 524              		.cfi_def_cfa_offset 12
+ 525              		.cfi_offset 4, -12
+ 526              		.cfi_offset 5, -8
+ 527              		.cfi_offset 14, -4
+ 528 0002 83B0     		sub	sp, sp, #12
+ 529              	.LCFI4:
+ 530              		.cfi_def_cfa_offset 24
+ 125:Core/Src/eprintf.c ****   int len = 0;
+ 531              		.loc 1 125 3 is_stmt 1 view .LVU134
+ 532              	.LVL67:
+ 126:Core/Src/eprintf.c **** 
+ 127:Core/Src/eprintf.c ****   switch (*((*fmt)++)) {
+ 533              		.loc 1 127 3 view .LVU135
+ 534              		.loc 1 127 14 is_stmt 0 view .LVU136
+ 535 0004 0C68     		ldr	r4, [r1]
+ 536              		.loc 1 127 19 view .LVU137
+ 537 0006 651C     		adds	r5, r4, #1
+ 538 0008 0D60     		str	r5, [r1]
+ 539              		.loc 1 127 11 view .LVU138
+ 540 000a 2178     		ldrb	r1, [r4]	@ zero_extendqisi2
+ 541              	.LVL68:
+ 542              		.loc 1 127 3 view .LVU139
+ 543 000c 5839     		subs	r1, r1, #88
+ 544 000e 2029     		cmp	r1, #32
+ 545 0010 22D8     		bhi	.L45
+ 546 0012 DFE801F0 		tbb	[pc, r1]
+ 547              	.L42:
+ 548 0016 19       		.byte	(.L41-.L42)/2
+ 549 0017 21       		.byte	(.L45-.L42)/2
+ 550 0018 21       		.byte	(.L45-.L42)/2
+ 551 0019 21       		.byte	(.L45-.L42)/2
+ 552 001a 21       		.byte	(.L45-.L42)/2
+ 553 001b 21       		.byte	(.L45-.L42)/2
+ 554 001c 21       		.byte	(.L45-.L42)/2
+ 555 001d 21       		.byte	(.L45-.L42)/2
+ 556 001e 21       		.byte	(.L45-.L42)/2
+ 557 001f 21       		.byte	(.L45-.L42)/2
+ 558 0020 21       		.byte	(.L45-.L42)/2
+ 559 0021 21       		.byte	(.L45-.L42)/2
+ 560 0022 11       		.byte	(.L44-.L42)/2
+ 561 0023 21       		.byte	(.L45-.L42)/2
+ 562 0024 21       		.byte	(.L45-.L42)/2
+ 563 0025 21       		.byte	(.L45-.L42)/2
+ 564 0026 21       		.byte	(.L45-.L42)/2
+ 565 0027 11       		.byte	(.L44-.L42)/2
+ 566 0028 21       		.byte	(.L45-.L42)/2
+ 567 0029 21       		.byte	(.L45-.L42)/2
+ 568 002a 21       		.byte	(.L45-.L42)/2
+ 569 002b 21       		.byte	(.L45-.L42)/2
+ 570 002c 21       		.byte	(.L45-.L42)/2
+ 571 002d 21       		.byte	(.L45-.L42)/2
+ 572 002e 21       		.byte	(.L45-.L42)/2
+ 573 002f 21       		.byte	(.L45-.L42)/2
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 14
+
+
+ 574 0030 21       		.byte	(.L45-.L42)/2
+ 575 0031 21       		.byte	(.L45-.L42)/2
+ 576 0032 21       		.byte	(.L45-.L42)/2
+ 577 0033 16       		.byte	(.L43-.L42)/2
+ 578 0034 21       		.byte	(.L45-.L42)/2
+ 579 0035 21       		.byte	(.L45-.L42)/2
+ 580 0036 19       		.byte	(.L41-.L42)/2
+ 581 0037 00       		.p2align 1
+ 582              	.L44:
+ 128:Core/Src/eprintf.c ****     case 'i':
+ 129:Core/Src/eprintf.c ****     case 'd':
+ 130:Core/Src/eprintf.c ****       len = itoa10(putcf, (long long int)val, 0);
+ 583              		.loc 1 130 7 is_stmt 1 view .LVU140
+ 584              		.loc 1 130 13 is_stmt 0 view .LVU141
+ 585 0038 0021     		movs	r1, #0
+ 586 003a 0091     		str	r1, [sp]
+ 587 003c FFF7FEFF 		bl	itoa10
+ 588              	.LVL69:
+ 131:Core/Src/eprintf.c ****       break;
+ 589              		.loc 1 131 7 is_stmt 1 view .LVU142
+ 590 0040 0BE0     		b	.L39
+ 591              	.LVL70:
+ 592              	.L43:
+ 132:Core/Src/eprintf.c ****     case 'u':
+ 133:Core/Src/eprintf.c ****       len = itoa10Unsigned(putcf, val);
+ 593              		.loc 1 133 7 view .LVU143
+ 594              		.loc 1 133 13 is_stmt 0 view .LVU144
+ 595 0042 FFF7FEFF 		bl	itoa10Unsigned
+ 596              	.LVL71:
+ 134:Core/Src/eprintf.c ****       break;
+ 597              		.loc 1 134 7 is_stmt 1 view .LVU145
+ 598 0046 08E0     		b	.L39
+ 599              	.LVL72:
+ 600              	.L41:
+ 135:Core/Src/eprintf.c ****     case 'x':
+ 136:Core/Src/eprintf.c ****     case 'X':
+ 137:Core/Src/eprintf.c ****       len = itoa16(putcf, val, width, padChar);
+ 601              		.loc 1 137 7 view .LVU146
+ 602              		.loc 1 137 13 is_stmt 0 view .LVU147
+ 603 0048 9DF81C10 		ldrb	r1, [sp, #28]	@ zero_extendqisi2
+ 604 004c 0191     		str	r1, [sp, #4]
+ 605 004e 0699     		ldr	r1, [sp, #24]
+ 606 0050 0091     		str	r1, [sp]
+ 607 0052 FFF7FEFF 		bl	itoa16
+ 608              	.LVL73:
+ 138:Core/Src/eprintf.c ****       break;
+ 609              		.loc 1 138 7 is_stmt 1 view .LVU148
+ 610 0056 00E0     		b	.L39
+ 611              	.LVL74:
+ 612              	.L45:
+ 127:Core/Src/eprintf.c ****     case 'i':
+ 613              		.loc 1 127 3 is_stmt 0 view .LVU149
+ 614 0058 0020     		movs	r0, #0
+ 615              	.LVL75:
+ 139:Core/Src/eprintf.c ****     default:
+ 140:Core/Src/eprintf.c ****       // Nothing here
+ 141:Core/Src/eprintf.c ****       break;
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 15
+
+
+ 142:Core/Src/eprintf.c ****   }
+ 143:Core/Src/eprintf.c **** 
+ 144:Core/Src/eprintf.c ****   return len;
+ 616              		.loc 1 144 3 is_stmt 1 view .LVU150
+ 617              	.L39:
+ 145:Core/Src/eprintf.c **** }
+ 618              		.loc 1 145 1 is_stmt 0 view .LVU151
+ 619 005a 03B0     		add	sp, sp, #12
+ 620              	.LCFI5:
+ 621              		.cfi_def_cfa_offset 12
+ 622              		@ sp needed
+ 623 005c 30BD     		pop	{r4, r5, pc}
+ 624              		.loc 1 145 1 view .LVU152
+ 625              		.cfi_endproc
+ 626              	.LFE6:
+ 628              		.section	.text.handleLong,"ax",%progbits
+ 629              		.align	1
+ 630              		.syntax unified
+ 631              		.thumb
+ 632              		.thumb_func
+ 634              	handleLong:
+ 635              	.LVL76:
+ 636              	.LFB7:
+ 146:Core/Src/eprintf.c **** 
+ 147:Core/Src/eprintf.c **** static int handleLong(putc_t putcf, const char** fmt, unsigned long int val, int width, char padCha
+ 637              		.loc 1 147 103 is_stmt 1 view -0
+ 638              		.cfi_startproc
+ 639              		@ args = 4, pretend = 0, frame = 0
+ 640              		@ frame_needed = 0, uses_anonymous_args = 0
+ 641              		.loc 1 147 103 is_stmt 0 view .LVU154
+ 642 0000 30B5     		push	{r4, r5, lr}
+ 643              	.LCFI6:
+ 644              		.cfi_def_cfa_offset 12
+ 645              		.cfi_offset 4, -12
+ 646              		.cfi_offset 5, -8
+ 647              		.cfi_offset 14, -4
+ 648 0002 83B0     		sub	sp, sp, #12
+ 649              	.LCFI7:
+ 650              		.cfi_def_cfa_offset 24
+ 148:Core/Src/eprintf.c ****   int len = 0;
+ 651              		.loc 1 148 3 is_stmt 1 view .LVU155
+ 652              	.LVL77:
+ 149:Core/Src/eprintf.c **** 
+ 150:Core/Src/eprintf.c ****   switch (*((*fmt)++)) {
+ 653              		.loc 1 150 3 view .LVU156
+ 654              		.loc 1 150 14 is_stmt 0 view .LVU157
+ 655 0004 0C68     		ldr	r4, [r1]
+ 656              		.loc 1 150 19 view .LVU158
+ 657 0006 651C     		adds	r5, r4, #1
+ 658 0008 0D60     		str	r5, [r1]
+ 659              		.loc 1 150 11 view .LVU159
+ 660 000a 2178     		ldrb	r1, [r4]	@ zero_extendqisi2
+ 661              	.LVL78:
+ 662              		.loc 1 150 3 view .LVU160
+ 663 000c 5839     		subs	r1, r1, #88
+ 664 000e 2029     		cmp	r1, #32
+ 665 0010 24D8     		bhi	.L53
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 16
+
+
+ 666 0012 DFE801F0 		tbb	[pc, r1]
+ 667              	.L50:
+ 668 0016 1B       		.byte	(.L49-.L50)/2
+ 669 0017 23       		.byte	(.L53-.L50)/2
+ 670 0018 23       		.byte	(.L53-.L50)/2
+ 671 0019 23       		.byte	(.L53-.L50)/2
+ 672 001a 23       		.byte	(.L53-.L50)/2
+ 673 001b 23       		.byte	(.L53-.L50)/2
+ 674 001c 23       		.byte	(.L53-.L50)/2
+ 675 001d 23       		.byte	(.L53-.L50)/2
+ 676 001e 23       		.byte	(.L53-.L50)/2
+ 677 001f 23       		.byte	(.L53-.L50)/2
+ 678 0020 23       		.byte	(.L53-.L50)/2
+ 679 0021 23       		.byte	(.L53-.L50)/2
+ 680 0022 11       		.byte	(.L52-.L50)/2
+ 681 0023 23       		.byte	(.L53-.L50)/2
+ 682 0024 23       		.byte	(.L53-.L50)/2
+ 683 0025 23       		.byte	(.L53-.L50)/2
+ 684 0026 23       		.byte	(.L53-.L50)/2
+ 685 0027 11       		.byte	(.L52-.L50)/2
+ 686 0028 23       		.byte	(.L53-.L50)/2
+ 687 0029 23       		.byte	(.L53-.L50)/2
+ 688 002a 23       		.byte	(.L53-.L50)/2
+ 689 002b 23       		.byte	(.L53-.L50)/2
+ 690 002c 23       		.byte	(.L53-.L50)/2
+ 691 002d 23       		.byte	(.L53-.L50)/2
+ 692 002e 23       		.byte	(.L53-.L50)/2
+ 693 002f 23       		.byte	(.L53-.L50)/2
+ 694 0030 23       		.byte	(.L53-.L50)/2
+ 695 0031 23       		.byte	(.L53-.L50)/2
+ 696 0032 23       		.byte	(.L53-.L50)/2
+ 697 0033 17       		.byte	(.L51-.L50)/2
+ 698 0034 23       		.byte	(.L53-.L50)/2
+ 699 0035 23       		.byte	(.L53-.L50)/2
+ 700 0036 1B       		.byte	(.L49-.L50)/2
+ 701 0037 00       		.p2align 1
+ 702              	.L52:
+ 151:Core/Src/eprintf.c ****     case 'i':
+ 152:Core/Src/eprintf.c ****     case 'd':
+ 153:Core/Src/eprintf.c ****       len = itoa10(putcf, (long int)val, 0);
+ 703              		.loc 1 153 7 is_stmt 1 view .LVU161
+ 704              		.loc 1 153 13 is_stmt 0 view .LVU162
+ 705 0038 0023     		movs	r3, #0
+ 706              	.LVL79:
+ 707              		.loc 1 153 13 view .LVU163
+ 708 003a 0093     		str	r3, [sp]
+ 709 003c D317     		asrs	r3, r2, #31
+ 710 003e FFF7FEFF 		bl	itoa10
+ 711              	.LVL80:
+ 154:Core/Src/eprintf.c ****       break;
+ 712              		.loc 1 154 7 is_stmt 1 view .LVU164
+ 713 0042 0CE0     		b	.L47
+ 714              	.LVL81:
+ 715              	.L51:
+ 155:Core/Src/eprintf.c ****     case 'u':
+ 156:Core/Src/eprintf.c ****       len = itoa10Unsigned(putcf, val);
+ 716              		.loc 1 156 7 view .LVU165
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 17
+
+
+ 717              		.loc 1 156 13 is_stmt 0 view .LVU166
+ 718 0044 0023     		movs	r3, #0
+ 719              	.LVL82:
+ 720              		.loc 1 156 13 view .LVU167
+ 721 0046 FFF7FEFF 		bl	itoa10Unsigned
+ 722              	.LVL83:
+ 157:Core/Src/eprintf.c ****       break;
+ 723              		.loc 1 157 7 is_stmt 1 view .LVU168
+ 724 004a 08E0     		b	.L47
+ 725              	.LVL84:
+ 726              	.L49:
+ 158:Core/Src/eprintf.c ****     case 'x':
+ 159:Core/Src/eprintf.c ****     case 'X':
+ 160:Core/Src/eprintf.c ****       len = itoa16(putcf, val, width, padChar);
+ 727              		.loc 1 160 7 view .LVU169
+ 728              		.loc 1 160 13 is_stmt 0 view .LVU170
+ 729 004c 9DF81810 		ldrb	r1, [sp, #24]	@ zero_extendqisi2
+ 730 0050 0191     		str	r1, [sp, #4]
+ 731 0052 0093     		str	r3, [sp]
+ 732 0054 0023     		movs	r3, #0
+ 733              	.LVL85:
+ 734              		.loc 1 160 13 view .LVU171
+ 735 0056 FFF7FEFF 		bl	itoa16
+ 736              	.LVL86:
+ 161:Core/Src/eprintf.c ****       break;
+ 737              		.loc 1 161 7 is_stmt 1 view .LVU172
+ 738 005a 00E0     		b	.L47
+ 739              	.LVL87:
+ 740              	.L53:
+ 150:Core/Src/eprintf.c ****     case 'i':
+ 741              		.loc 1 150 3 is_stmt 0 view .LVU173
+ 742 005c 0020     		movs	r0, #0
+ 743              	.LVL88:
+ 162:Core/Src/eprintf.c ****     default:
+ 163:Core/Src/eprintf.c ****       // Nothing here
+ 164:Core/Src/eprintf.c ****       break;
+ 165:Core/Src/eprintf.c ****   }
+ 166:Core/Src/eprintf.c **** 
+ 167:Core/Src/eprintf.c ****   return len;
+ 744              		.loc 1 167 3 is_stmt 1 view .LVU174
+ 745              	.L47:
+ 168:Core/Src/eprintf.c **** }
+ 746              		.loc 1 168 1 is_stmt 0 view .LVU175
+ 747 005e 03B0     		add	sp, sp, #12
+ 748              	.LCFI8:
+ 749              		.cfi_def_cfa_offset 12
+ 750              		@ sp needed
+ 751 0060 30BD     		pop	{r4, r5, pc}
+ 752              		.loc 1 168 1 view .LVU176
+ 753              		.cfi_endproc
+ 754              	.LFE7:
+ 756              		.section	.text.power,"ax",%progbits
+ 757              		.align	1
+ 758              		.global	power
+ 759              		.syntax unified
+ 760              		.thumb
+ 761              		.thumb_func
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 18
+
+
+ 763              	power:
+ 764              	.LVL89:
+ 765              	.LFB2:
+  45:Core/Src/eprintf.c ****   int x = a;
+ 766              		.loc 1 45 25 is_stmt 1 view -0
+ 767              		.cfi_startproc
+ 768              		@ args = 0, pretend = 0, frame = 0
+ 769              		@ frame_needed = 0, uses_anonymous_args = 0
+ 770              		@ link register save eliminated.
+  45:Core/Src/eprintf.c ****   int x = a;
+ 771              		.loc 1 45 25 is_stmt 0 view .LVU178
+ 772 0000 0246     		mov	r2, r0
+  46:Core/Src/eprintf.c ****   for (int i = 1; i < b; i++)
+ 773              		.loc 1 46 3 is_stmt 1 view .LVU179
+ 774              	.LVL90:
+  47:Core/Src/eprintf.c ****     x *= a;
+ 775              		.loc 1 47 3 view .LVU180
+ 776              	.LBB8:
+  47:Core/Src/eprintf.c ****     x *= a;
+ 777              		.loc 1 47 8 view .LVU181
+  47:Core/Src/eprintf.c ****     x *= a;
+ 778              		.loc 1 47 12 is_stmt 0 view .LVU182
+ 779 0002 0123     		movs	r3, #1
+  47:Core/Src/eprintf.c ****     x *= a;
+ 780              		.loc 1 47 3 view .LVU183
+ 781 0004 02E0     		b	.L56
+ 782              	.LVL91:
+ 783              	.L57:
+  48:Core/Src/eprintf.c ****   return x;
+ 784              		.loc 1 48 5 is_stmt 1 discriminator 3 view .LVU184
+  48:Core/Src/eprintf.c ****   return x;
+ 785              		.loc 1 48 7 is_stmt 0 discriminator 3 view .LVU185
+ 786 0006 02FB00F0 		mul	r0, r2, r0
+ 787              	.LVL92:
+  47:Core/Src/eprintf.c ****     x *= a;
+ 788              		.loc 1 47 26 is_stmt 1 discriminator 3 view .LVU186
+  47:Core/Src/eprintf.c ****     x *= a;
+ 789              		.loc 1 47 27 is_stmt 0 discriminator 3 view .LVU187
+ 790 000a 0133     		adds	r3, r3, #1
+ 791              	.LVL93:
+ 792              	.L56:
+  47:Core/Src/eprintf.c ****     x *= a;
+ 793              		.loc 1 47 19 is_stmt 1 discriminator 1 view .LVU188
+  47:Core/Src/eprintf.c ****     x *= a;
+ 794              		.loc 1 47 3 is_stmt 0 discriminator 1 view .LVU189
+ 795 000c 8B42     		cmp	r3, r1
+ 796 000e FADB     		blt	.L57
+  47:Core/Src/eprintf.c ****     x *= a;
+ 797              		.loc 1 47 3 discriminator 1 view .LVU190
+ 798              	.LBE8:
+  49:Core/Src/eprintf.c **** }
+ 799              		.loc 1 49 3 is_stmt 1 view .LVU191
+  50:Core/Src/eprintf.c **** 
+ 800              		.loc 1 50 1 is_stmt 0 view .LVU192
+ 801 0010 7047     		bx	lr
+ 802              		.cfi_endproc
+ 803              	.LFE2:
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 19
+
+
+ 805              		.global	__aeabi_d2f
+ 806              		.global	__aeabi_f2lz
+ 807              		.section	.text.evprintf,"ax",%progbits
+ 808              		.align	1
+ 809              		.global	evprintf
+ 810              		.syntax unified
+ 811              		.thumb
+ 812              		.thumb_func
+ 814              	evprintf:
+ 815              	.LVL94:
+ 816              	.LFB8:
+ 169:Core/Src/eprintf.c **** 
+ 170:Core/Src/eprintf.c **** int evprintf(putc_t putcf, const char * fmt, va_list ap) {
+ 817              		.loc 1 170 58 is_stmt 1 view -0
+ 818              		.cfi_startproc
+ 819              		@ args = 0, pretend = 0, frame = 8
+ 820              		@ frame_needed = 0, uses_anonymous_args = 0
+ 821              		.loc 1 170 58 is_stmt 0 view .LVU194
+ 822 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 823              	.LCFI9:
+ 824              		.cfi_def_cfa_offset 20
+ 825              		.cfi_offset 4, -20
+ 826              		.cfi_offset 5, -16
+ 827              		.cfi_offset 6, -12
+ 828              		.cfi_offset 7, -8
+ 829              		.cfi_offset 14, -4
+ 830 0002 2DED028B 		vpush.64	{d8}
+ 831              	.LCFI10:
+ 832              		.cfi_def_cfa_offset 28
+ 833              		.cfi_offset 80, -28
+ 834              		.cfi_offset 81, -24
+ 835 0006 85B0     		sub	sp, sp, #20
+ 836              	.LCFI11:
+ 837              		.cfi_def_cfa_offset 48
+ 838 0008 0546     		mov	r5, r0
+ 839 000a 0391     		str	r1, [sp, #12]
+ 840 000c 0292     		str	r2, [sp, #8]
+ 171:Core/Src/eprintf.c ****   int len = 0;
+ 841              		.loc 1 171 3 is_stmt 1 view .LVU195
+ 842              	.LVL95:
+ 172:Core/Src/eprintf.c ****   float num;
+ 843              		.loc 1 172 3 view .LVU196
+ 173:Core/Src/eprintf.c ****   char* str;
+ 844              		.loc 1 173 3 view .LVU197
+ 174:Core/Src/eprintf.c ****   int precision;
+ 845              		.loc 1 174 3 view .LVU198
+ 175:Core/Src/eprintf.c ****   int width;
+ 846              		.loc 1 175 3 view .LVU199
+ 176:Core/Src/eprintf.c ****   char padChar;
+ 847              		.loc 1 176 3 view .LVU200
+ 177:Core/Src/eprintf.c **** 
+ 178:Core/Src/eprintf.c ****   while (*fmt) {
+ 848              		.loc 1 178 3 view .LVU201
+ 171:Core/Src/eprintf.c ****   float num;
+ 849              		.loc 1 171 7 is_stmt 0 view .LVU202
+ 850 000e 0024     		movs	r4, #0
+ 851              	.LVL96:
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 20
+
+
+ 852              	.L59:
+ 853              		.loc 1 178 9 is_stmt 1 view .LVU203
+ 854              		.loc 1 178 10 is_stmt 0 view .LVU204
+ 855 0010 039B     		ldr	r3, [sp, #12]
+ 856 0012 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 857              		.loc 1 178 9 view .LVU205
+ 858 0014 002A     		cmp	r2, #0
+ 859 0016 00F01F81 		beq	.L86
+ 179:Core/Src/eprintf.c ****     if (*fmt == '%') {
+ 860              		.loc 1 179 5 is_stmt 1 view .LVU206
+ 861              		.loc 1 179 8 is_stmt 0 view .LVU207
+ 862 001a 252A     		cmp	r2, #37
+ 863 001c 05D0     		beq	.L87
+ 180:Core/Src/eprintf.c ****       precision = 6;
+ 181:Core/Src/eprintf.c ****       padChar = ' ';
+ 182:Core/Src/eprintf.c ****       width = 0;
+ 183:Core/Src/eprintf.c **** 
+ 184:Core/Src/eprintf.c ****       fmt++;
+ 185:Core/Src/eprintf.c ****       while ('0' == *fmt) {
+ 186:Core/Src/eprintf.c ****         padChar = '0';
+ 187:Core/Src/eprintf.c ****         fmt++;
+ 188:Core/Src/eprintf.c ****       }
+ 189:Core/Src/eprintf.c **** 
+ 190:Core/Src/eprintf.c **** 			while (isdigit((unsigned)*fmt)) {
+ 191:Core/Src/eprintf.c **** 				width *= 10;
+ 192:Core/Src/eprintf.c **** 				width += *fmt - '0';
+ 193:Core/Src/eprintf.c **** 				fmt++;
+ 194:Core/Src/eprintf.c **** 			}
+ 195:Core/Src/eprintf.c **** 
+ 196:Core/Src/eprintf.c ****       while (!isalpha((unsigned) *fmt)) {
+ 197:Core/Src/eprintf.c ****         if (*fmt == '.') {
+ 198:Core/Src/eprintf.c ****           fmt++;
+ 199:Core/Src/eprintf.c ****           if (isdigit((unsigned)*fmt)) {
+ 200:Core/Src/eprintf.c ****             precision = *fmt - '0';
+ 201:Core/Src/eprintf.c ****             fmt++;
+ 202:Core/Src/eprintf.c ****           }
+ 203:Core/Src/eprintf.c ****         }
+ 204:Core/Src/eprintf.c ****       }
+ 205:Core/Src/eprintf.c ****       switch (*fmt++) {
+ 206:Core/Src/eprintf.c ****         case 'i':
+ 207:Core/Src/eprintf.c ****         case 'd':
+ 208:Core/Src/eprintf.c ****           len += itoa10(putcf, va_arg(ap, int), 0);
+ 209:Core/Src/eprintf.c ****           break;
+ 210:Core/Src/eprintf.c ****         case 'u':
+ 211:Core/Src/eprintf.c ****           len += itoa10Unsigned(putcf, va_arg(ap, unsigned int));
+ 212:Core/Src/eprintf.c ****           break;
+ 213:Core/Src/eprintf.c ****         case 'x':
+ 214:Core/Src/eprintf.c ****         case 'X':
+ 215:Core/Src/eprintf.c ****           len += itoa16(putcf, va_arg(ap, unsigned int), width, padChar);
+ 216:Core/Src/eprintf.c ****           break;
+ 217:Core/Src/eprintf.c ****         case 'l':
+ 218:Core/Src/eprintf.c ****           // Look ahead for ll
+ 219:Core/Src/eprintf.c ****           if (*fmt == 'l') {
+ 220:Core/Src/eprintf.c ****             fmt++;
+ 221:Core/Src/eprintf.c ****             len += handleLongLong(putcf, &fmt, va_arg(ap, unsigned long long int), width, padChar);
+ 222:Core/Src/eprintf.c ****           } else {
+ 223:Core/Src/eprintf.c ****             len += handleLong(putcf, &fmt, va_arg(ap, unsigned long int), width, padChar);
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 21
+
+
+ 224:Core/Src/eprintf.c ****           }
+ 225:Core/Src/eprintf.c **** 
+ 226:Core/Src/eprintf.c ****           break;
+ 227:Core/Src/eprintf.c ****         case 'f':
+ 228:Core/Src/eprintf.c ****           num = va_arg(ap, double);
+ 229:Core/Src/eprintf.c ****           if (num < 0) {
+ 230:Core/Src/eprintf.c ****             putcf('-');
+ 231:Core/Src/eprintf.c ****             num = -num;
+ 232:Core/Src/eprintf.c ****             len++;
+ 233:Core/Src/eprintf.c ****           }
+ 234:Core/Src/eprintf.c ****           len += itoa10(putcf, (int)num, 0);
+ 235:Core/Src/eprintf.c ****           putcf('.'); len++;
+ 236:Core/Src/eprintf.c ****           len += itoa10(putcf, (num - (int)num) * power(10, precision), precision);
+ 237:Core/Src/eprintf.c ****           break;
+ 238:Core/Src/eprintf.c ****         case 's':
+ 239:Core/Src/eprintf.c ****           str = va_arg(ap, char* );
+ 240:Core/Src/eprintf.c ****           while (*str) {
+ 241:Core/Src/eprintf.c ****             putcf(*str++);
+ 242:Core/Src/eprintf.c ****             len++;
+ 243:Core/Src/eprintf.c ****           }
+ 244:Core/Src/eprintf.c ****           break;
+ 245:Core/Src/eprintf.c ****         case 'c':
+ 246:Core/Src/eprintf.c ****           putcf((char) va_arg(ap, int));
+ 247:Core/Src/eprintf.c ****           len++;
+ 248:Core/Src/eprintf.c ****           break;
+ 249:Core/Src/eprintf.c ****         default:
+ 250:Core/Src/eprintf.c ****           break;
+ 251:Core/Src/eprintf.c ****       }
+ 252:Core/Src/eprintf.c ****     } else {
+ 253:Core/Src/eprintf.c ****       putcf(*fmt++);
+ 864              		.loc 1 253 7 is_stmt 1 view .LVU208
+ 865              		.loc 1 253 17 is_stmt 0 view .LVU209
+ 866 001e 5A1C     		adds	r2, r3, #1
+ 867 0020 0392     		str	r2, [sp, #12]
+ 868              		.loc 1 253 7 view .LVU210
+ 869 0022 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 870 0024 A847     		blx	r5
+ 871              	.LVL97:
+ 254:Core/Src/eprintf.c ****       len++;
+ 872              		.loc 1 254 7 is_stmt 1 view .LVU211
+ 873              		.loc 1 254 10 is_stmt 0 view .LVU212
+ 874 0026 0134     		adds	r4, r4, #1
+ 875              	.LVL98:
+ 876              		.loc 1 254 10 view .LVU213
+ 877 0028 F2E7     		b	.L59
+ 878              	.L87:
+ 180:Core/Src/eprintf.c ****       precision = 6;
+ 879              		.loc 1 180 7 is_stmt 1 view .LVU214
+ 880              	.LVL99:
+ 181:Core/Src/eprintf.c ****       width = 0;
+ 881              		.loc 1 181 7 view .LVU215
+ 182:Core/Src/eprintf.c **** 
+ 882              		.loc 1 182 7 view .LVU216
+ 184:Core/Src/eprintf.c ****       while ('0' == *fmt) {
+ 883              		.loc 1 184 7 view .LVU217
+ 184:Core/Src/eprintf.c ****       while ('0' == *fmt) {
+ 884              		.loc 1 184 10 is_stmt 0 view .LVU218
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 22
+
+
+ 885 002a 0133     		adds	r3, r3, #1
+ 886 002c 0393     		str	r3, [sp, #12]
+ 185:Core/Src/eprintf.c ****         padChar = '0';
+ 887              		.loc 1 185 7 is_stmt 1 view .LVU219
+ 181:Core/Src/eprintf.c ****       width = 0;
+ 888              		.loc 1 181 15 is_stmt 0 view .LVU220
+ 889 002e 2027     		movs	r7, #32
+ 185:Core/Src/eprintf.c ****         padChar = '0';
+ 890              		.loc 1 185 13 view .LVU221
+ 891 0030 02E0     		b	.L61
+ 892              	.LVL100:
+ 893              	.L62:
+ 186:Core/Src/eprintf.c ****         fmt++;
+ 894              		.loc 1 186 9 is_stmt 1 view .LVU222
+ 187:Core/Src/eprintf.c ****       }
+ 895              		.loc 1 187 9 view .LVU223
+ 187:Core/Src/eprintf.c ****       }
+ 896              		.loc 1 187 12 is_stmt 0 view .LVU224
+ 897 0032 0133     		adds	r3, r3, #1
+ 898 0034 0393     		str	r3, [sp, #12]
+ 186:Core/Src/eprintf.c ****         fmt++;
+ 899              		.loc 1 186 17 view .LVU225
+ 900 0036 1746     		mov	r7, r2
+ 901              	.LVL101:
+ 902              	.L61:
+ 185:Core/Src/eprintf.c ****         padChar = '0';
+ 903              		.loc 1 185 13 is_stmt 1 view .LVU226
+ 185:Core/Src/eprintf.c ****         padChar = '0';
+ 904              		.loc 1 185 21 is_stmt 0 view .LVU227
+ 905 0038 039B     		ldr	r3, [sp, #12]
+ 906 003a 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 185:Core/Src/eprintf.c ****         padChar = '0';
+ 907              		.loc 1 185 13 view .LVU228
+ 908 003c 302A     		cmp	r2, #48
+ 909 003e F8D0     		beq	.L62
+ 182:Core/Src/eprintf.c **** 
+ 910              		.loc 1 182 13 view .LVU229
+ 911 0040 0023     		movs	r3, #0
+ 912 0042 06E0     		b	.L63
+ 913              	.LVL102:
+ 914              	.L64:
+ 191:Core/Src/eprintf.c **** 				width += *fmt - '0';
+ 915              		.loc 1 191 5 is_stmt 1 view .LVU230
+ 191:Core/Src/eprintf.c **** 				width += *fmt - '0';
+ 916              		.loc 1 191 11 is_stmt 0 view .LVU231
+ 917 0044 03EB8303 		add	r3, r3, r3, lsl #2
+ 918              	.LVL103:
+ 192:Core/Src/eprintf.c **** 				fmt++;
+ 919              		.loc 1 192 5 is_stmt 1 view .LVU232
+ 192:Core/Src/eprintf.c **** 				fmt++;
+ 920              		.loc 1 192 19 is_stmt 0 view .LVU233
+ 921 0048 303A     		subs	r2, r2, #48
+ 192:Core/Src/eprintf.c **** 				fmt++;
+ 922              		.loc 1 192 11 view .LVU234
+ 923 004a 02EB4303 		add	r3, r2, r3, lsl #1
+ 924              	.LVL104:
+ 193:Core/Src/eprintf.c **** 			}
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 23
+
+
+ 925              		.loc 1 193 5 is_stmt 1 view .LVU235
+ 193:Core/Src/eprintf.c **** 			}
+ 926              		.loc 1 193 8 is_stmt 0 view .LVU236
+ 927 004e 0131     		adds	r1, r1, #1
+ 928 0050 0391     		str	r1, [sp, #12]
+ 929              	.LVL105:
+ 930              	.L63:
+ 190:Core/Src/eprintf.c **** 				width *= 10;
+ 931              		.loc 1 190 10 is_stmt 1 view .LVU237
+ 190:Core/Src/eprintf.c **** 				width *= 10;
+ 932              		.loc 1 190 11 is_stmt 0 view .LVU238
+ 933 0052 0399     		ldr	r1, [sp, #12]
+ 934 0054 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 935 0056 8348     		ldr	r0, .L91
+ 936 0058 105C     		ldrb	r0, [r2, r0]	@ zero_extendqisi2
+ 190:Core/Src/eprintf.c **** 				width *= 10;
+ 937              		.loc 1 190 10 view .LVU239
+ 938 005a 10F0040F 		tst	r0, #4
+ 939 005e F1D1     		bne	.L64
+ 180:Core/Src/eprintf.c ****       padChar = ' ';
+ 940              		.loc 1 180 17 view .LVU240
+ 941 0060 0626     		movs	r6, #6
+ 942              	.LVL106:
+ 943              	.L66:
+ 196:Core/Src/eprintf.c ****         if (*fmt == '.') {
+ 944              		.loc 1 196 13 is_stmt 1 view .LVU241
+ 196:Core/Src/eprintf.c ****         if (*fmt == '.') {
+ 945              		.loc 1 196 15 is_stmt 0 view .LVU242
+ 946 0062 0399     		ldr	r1, [sp, #12]
+ 947 0064 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 948 0066 7F48     		ldr	r0, .L91
+ 949 0068 105C     		ldrb	r0, [r2, r0]	@ zero_extendqisi2
+ 196:Core/Src/eprintf.c ****         if (*fmt == '.') {
+ 950              		.loc 1 196 13 view .LVU243
+ 951 006a 10F0030F 		tst	r0, #3
+ 952 006e 0ED1     		bne	.L88
+ 197:Core/Src/eprintf.c ****           fmt++;
+ 953              		.loc 1 197 9 is_stmt 1 view .LVU244
+ 197:Core/Src/eprintf.c ****           fmt++;
+ 954              		.loc 1 197 12 is_stmt 0 view .LVU245
+ 955 0070 2E2A     		cmp	r2, #46
+ 956 0072 F6D1     		bne	.L66
+ 198:Core/Src/eprintf.c ****           if (isdigit((unsigned)*fmt)) {
+ 957              		.loc 1 198 11 is_stmt 1 view .LVU246
+ 198:Core/Src/eprintf.c ****           if (isdigit((unsigned)*fmt)) {
+ 958              		.loc 1 198 14 is_stmt 0 view .LVU247
+ 959 0074 4A1C     		adds	r2, r1, #1
+ 960 0076 0392     		str	r2, [sp, #12]
+ 199:Core/Src/eprintf.c ****             precision = *fmt - '0';
+ 961              		.loc 1 199 11 is_stmt 1 view .LVU248
+ 199:Core/Src/eprintf.c ****             precision = *fmt - '0';
+ 962              		.loc 1 199 15 is_stmt 0 view .LVU249
+ 963 0078 4978     		ldrb	r1, [r1, #1]	@ zero_extendqisi2
+ 964 007a 7A48     		ldr	r0, .L91
+ 965 007c 085C     		ldrb	r0, [r1, r0]	@ zero_extendqisi2
+ 199:Core/Src/eprintf.c ****             precision = *fmt - '0';
+ 966              		.loc 1 199 14 view .LVU250
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 24
+
+
+ 967 007e 10F0040F 		tst	r0, #4
+ 968 0082 EED0     		beq	.L66
+ 200:Core/Src/eprintf.c ****             fmt++;
+ 969              		.loc 1 200 13 is_stmt 1 view .LVU251
+ 200:Core/Src/eprintf.c ****             fmt++;
+ 970              		.loc 1 200 23 is_stmt 0 view .LVU252
+ 971 0084 A1F13006 		sub	r6, r1, #48
+ 972              	.LVL107:
+ 201:Core/Src/eprintf.c ****           }
+ 973              		.loc 1 201 13 is_stmt 1 view .LVU253
+ 201:Core/Src/eprintf.c ****           }
+ 974              		.loc 1 201 16 is_stmt 0 view .LVU254
+ 975 0088 0132     		adds	r2, r2, #1
+ 976 008a 0392     		str	r2, [sp, #12]
+ 977 008c E9E7     		b	.L66
+ 978              	.L88:
+ 205:Core/Src/eprintf.c ****         case 'i':
+ 979              		.loc 1 205 7 is_stmt 1 view .LVU255
+ 205:Core/Src/eprintf.c ****         case 'i':
+ 980              		.loc 1 205 19 is_stmt 0 view .LVU256
+ 981 008e 481C     		adds	r0, r1, #1
+ 982 0090 0390     		str	r0, [sp, #12]
+ 205:Core/Src/eprintf.c ****         case 'i':
+ 983              		.loc 1 205 15 view .LVU257
+ 984 0092 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 205:Core/Src/eprintf.c ****         case 'i':
+ 985              		.loc 1 205 7 view .LVU258
+ 986 0094 583A     		subs	r2, r2, #88
+ 987 0096 202A     		cmp	r2, #32
+ 988 0098 BAD8     		bhi	.L59
+ 989 009a 0FF2080C 		adr	ip, .L71
+ 990 009e 5CF822F0 		ldr	pc, [ip, r2, lsl #2]
+ 991 00a2 00BF     		.p2align 2
+ 992              	.L71:
+ 993 00a4 55010000 		.word	.L70+1
+ 994 00a8 11000000 		.word	.L59+1
+ 995 00ac 11000000 		.word	.L59+1
+ 996 00b0 11000000 		.word	.L59+1
+ 997 00b4 11000000 		.word	.L59+1
+ 998 00b8 11000000 		.word	.L59+1
+ 999 00bc 11000000 		.word	.L59+1
+ 1000 00c0 11000000 		.word	.L59+1
+ 1001 00c4 11000000 		.word	.L59+1
+ 1002 00c8 11000000 		.word	.L59+1
+ 1003 00cc 11000000 		.word	.L59+1
+ 1004 00d0 4B020000 		.word	.L77+1
+ 1005 00d4 29010000 		.word	.L75+1
+ 1006 00d8 11000000 		.word	.L59+1
+ 1007 00dc B3010000 		.word	.L76+1
+ 1008 00e0 11000000 		.word	.L59+1
+ 1009 00e4 11000000 		.word	.L59+1
+ 1010 00e8 29010000 		.word	.L75+1
+ 1011 00ec 11000000 		.word	.L59+1
+ 1012 00f0 11000000 		.word	.L59+1
+ 1013 00f4 6D010000 		.word	.L74+1
+ 1014 00f8 11000000 		.word	.L59+1
+ 1015 00fc 11000000 		.word	.L59+1
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 25
+
+
+ 1016 0100 11000000 		.word	.L59+1
+ 1017 0104 11000000 		.word	.L59+1
+ 1018 0108 11000000 		.word	.L59+1
+ 1019 010c 11000000 		.word	.L59+1
+ 1020 0110 33020000 		.word	.L73+1
+ 1021 0114 11000000 		.word	.L59+1
+ 1022 0118 41010000 		.word	.L72+1
+ 1023 011c 11000000 		.word	.L59+1
+ 1024 0120 11000000 		.word	.L59+1
+ 1025 0124 55010000 		.word	.L70+1
+ 1026              		.p2align 1
+ 1027              	.L75:
+ 208:Core/Src/eprintf.c ****           break;
+ 1028              		.loc 1 208 11 is_stmt 1 view .LVU259
+ 208:Core/Src/eprintf.c ****           break;
+ 1029              		.loc 1 208 32 is_stmt 0 view .LVU260
+ 1030 0128 029B     		ldr	r3, [sp, #8]
+ 1031              	.LVL108:
+ 208:Core/Src/eprintf.c ****           break;
+ 1032              		.loc 1 208 32 view .LVU261
+ 1033 012a 1A1D     		adds	r2, r3, #4
+ 1034 012c 0292     		str	r2, [sp, #8]
+ 1035 012e 1A68     		ldr	r2, [r3]
+ 208:Core/Src/eprintf.c ****           break;
+ 1036              		.loc 1 208 18 view .LVU262
+ 1037 0130 0023     		movs	r3, #0
+ 1038 0132 0093     		str	r3, [sp]
+ 1039 0134 D317     		asrs	r3, r2, #31
+ 1040 0136 2846     		mov	r0, r5
+ 1041 0138 FFF7FEFF 		bl	itoa10
+ 1042              	.LVL109:
+ 208:Core/Src/eprintf.c ****           break;
+ 1043              		.loc 1 208 15 view .LVU263
+ 1044 013c 0444     		add	r4, r4, r0
+ 1045              	.LVL110:
+ 209:Core/Src/eprintf.c ****         case 'u':
+ 1046              		.loc 1 209 11 is_stmt 1 view .LVU264
+ 1047 013e 67E7     		b	.L59
+ 1048              	.LVL111:
+ 1049              	.L72:
+ 211:Core/Src/eprintf.c ****           break;
+ 1050              		.loc 1 211 11 view .LVU265
+ 211:Core/Src/eprintf.c ****           break;
+ 1051              		.loc 1 211 40 is_stmt 0 view .LVU266
+ 1052 0140 029B     		ldr	r3, [sp, #8]
+ 1053              	.LVL112:
+ 211:Core/Src/eprintf.c ****           break;
+ 1054              		.loc 1 211 40 view .LVU267
+ 1055 0142 1A1D     		adds	r2, r3, #4
+ 1056 0144 0292     		str	r2, [sp, #8]
+ 211:Core/Src/eprintf.c ****           break;
+ 1057              		.loc 1 211 18 view .LVU268
+ 1058 0146 1A68     		ldr	r2, [r3]
+ 1059 0148 0023     		movs	r3, #0
+ 1060 014a 2846     		mov	r0, r5
+ 1061 014c FFF7FEFF 		bl	itoa10Unsigned
+ 1062              	.LVL113:
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 26
+
+
+ 211:Core/Src/eprintf.c ****           break;
+ 1063              		.loc 1 211 15 view .LVU269
+ 1064 0150 0444     		add	r4, r4, r0
+ 1065              	.LVL114:
+ 212:Core/Src/eprintf.c ****         case 'x':
+ 1066              		.loc 1 212 11 is_stmt 1 view .LVU270
+ 1067 0152 5DE7     		b	.L59
+ 1068              	.LVL115:
+ 1069              	.L70:
+ 215:Core/Src/eprintf.c ****           break;
+ 1070              		.loc 1 215 11 view .LVU271
+ 215:Core/Src/eprintf.c ****           break;
+ 1071              		.loc 1 215 32 is_stmt 0 view .LVU272
+ 1072 0154 029A     		ldr	r2, [sp, #8]
+ 1073 0156 111D     		adds	r1, r2, #4
+ 1074 0158 0291     		str	r1, [sp, #8]
+ 1075 015a 1268     		ldr	r2, [r2]
+ 215:Core/Src/eprintf.c ****           break;
+ 1076              		.loc 1 215 18 view .LVU273
+ 1077 015c 0197     		str	r7, [sp, #4]
+ 1078 015e 0093     		str	r3, [sp]
+ 1079 0160 0023     		movs	r3, #0
+ 1080              	.LVL116:
+ 215:Core/Src/eprintf.c ****           break;
+ 1081              		.loc 1 215 18 view .LVU274
+ 1082 0162 2846     		mov	r0, r5
+ 1083 0164 FFF7FEFF 		bl	itoa16
+ 1084              	.LVL117:
+ 215:Core/Src/eprintf.c ****           break;
+ 1085              		.loc 1 215 15 view .LVU275
+ 1086 0168 0444     		add	r4, r4, r0
+ 1087              	.LVL118:
+ 216:Core/Src/eprintf.c ****         case 'l':
+ 1088              		.loc 1 216 11 is_stmt 1 view .LVU276
+ 1089 016a 51E7     		b	.L59
+ 1090              	.LVL119:
+ 1091              	.L74:
+ 219:Core/Src/eprintf.c ****             fmt++;
+ 1092              		.loc 1 219 11 view .LVU277
+ 219:Core/Src/eprintf.c ****             fmt++;
+ 1093              		.loc 1 219 15 is_stmt 0 view .LVU278
+ 1094 016c 4A78     		ldrb	r2, [r1, #1]	@ zero_extendqisi2
+ 219:Core/Src/eprintf.c ****             fmt++;
+ 1095              		.loc 1 219 14 view .LVU279
+ 1096 016e 6C2A     		cmp	r2, #108
+ 1097 0170 0AD0     		beq	.L89
+ 223:Core/Src/eprintf.c ****           }
+ 1098              		.loc 1 223 13 is_stmt 1 view .LVU280
+ 223:Core/Src/eprintf.c ****           }
+ 1099              		.loc 1 223 20 is_stmt 0 view .LVU281
+ 1100 0172 029A     		ldr	r2, [sp, #8]
+ 1101 0174 111D     		adds	r1, r2, #4
+ 1102 0176 0291     		str	r1, [sp, #8]
+ 1103 0178 1268     		ldr	r2, [r2]
+ 1104 017a 0097     		str	r7, [sp]
+ 1105 017c 03A9     		add	r1, sp, #12
+ 1106 017e 2846     		mov	r0, r5
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 27
+
+
+ 1107 0180 FFF7FEFF 		bl	handleLong
+ 1108              	.LVL120:
+ 223:Core/Src/eprintf.c ****           }
+ 1109              		.loc 1 223 17 view .LVU282
+ 1110 0184 0444     		add	r4, r4, r0
+ 1111              	.LVL121:
+ 223:Core/Src/eprintf.c ****           }
+ 1112              		.loc 1 223 17 view .LVU283
+ 1113 0186 43E7     		b	.L59
+ 1114              	.LVL122:
+ 1115              	.L89:
+ 220:Core/Src/eprintf.c ****             len += handleLongLong(putcf, &fmt, va_arg(ap, unsigned long long int), width, padChar);
+ 1116              		.loc 1 220 13 is_stmt 1 view .LVU284
+ 220:Core/Src/eprintf.c ****             len += handleLongLong(putcf, &fmt, va_arg(ap, unsigned long long int), width, padChar);
+ 1117              		.loc 1 220 16 is_stmt 0 view .LVU285
+ 1118 0188 0130     		adds	r0, r0, #1
+ 1119 018a 0390     		str	r0, [sp, #12]
+ 221:Core/Src/eprintf.c ****           } else {
+ 1120              		.loc 1 221 13 is_stmt 1 view .LVU286
+ 221:Core/Src/eprintf.c ****           } else {
+ 1121              		.loc 1 221 20 is_stmt 0 view .LVU287
+ 1122 018c 029A     		ldr	r2, [sp, #8]
+ 1123 018e 0732     		adds	r2, r2, #7
+ 1124 0190 22F00702 		bic	r2, r2, #7
+ 1125 0194 02F10801 		add	r1, r2, #8
+ 1126 0198 0291     		str	r1, [sp, #8]
+ 1127 019a D2E90001 		ldrd	r0, [r2]
+ 1128 019e 0197     		str	r7, [sp, #4]
+ 1129 01a0 0093     		str	r3, [sp]
+ 1130 01a2 0246     		mov	r2, r0
+ 1131 01a4 0B46     		mov	r3, r1
+ 1132              	.LVL123:
+ 221:Core/Src/eprintf.c ****           } else {
+ 1133              		.loc 1 221 20 view .LVU288
+ 1134 01a6 03A9     		add	r1, sp, #12
+ 1135 01a8 2846     		mov	r0, r5
+ 1136 01aa FFF7FEFF 		bl	handleLongLong
+ 1137              	.LVL124:
+ 221:Core/Src/eprintf.c ****           } else {
+ 1138              		.loc 1 221 17 view .LVU289
+ 1139 01ae 0444     		add	r4, r4, r0
+ 1140              	.LVL125:
+ 221:Core/Src/eprintf.c ****           } else {
+ 1141              		.loc 1 221 17 view .LVU290
+ 1142 01b0 2EE7     		b	.L59
+ 1143              	.LVL126:
+ 1144              	.L76:
+ 228:Core/Src/eprintf.c ****           if (num < 0) {
+ 1145              		.loc 1 228 11 is_stmt 1 view .LVU291
+ 228:Core/Src/eprintf.c ****           if (num < 0) {
+ 1146              		.loc 1 228 17 is_stmt 0 view .LVU292
+ 1147 01b2 029B     		ldr	r3, [sp, #8]
+ 1148              	.LVL127:
+ 228:Core/Src/eprintf.c ****           if (num < 0) {
+ 1149              		.loc 1 228 17 view .LVU293
+ 1150 01b4 0733     		adds	r3, r3, #7
+ 1151 01b6 23F00703 		bic	r3, r3, #7
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 28
+
+
+ 1152 01ba 03F10802 		add	r2, r3, #8
+ 1153 01be 0292     		str	r2, [sp, #8]
+ 228:Core/Src/eprintf.c ****           if (num < 0) {
+ 1154              		.loc 1 228 15 view .LVU294
+ 1155 01c0 D3E90001 		ldrd	r0, [r3]
+ 1156 01c4 FFF7FEFF 		bl	__aeabi_d2f
+ 1157              	.LVL128:
+ 1158 01c8 08EE100A 		vmov	s16, r0
+ 1159              	.LVL129:
+ 229:Core/Src/eprintf.c ****             putcf('-');
+ 1160              		.loc 1 229 11 is_stmt 1 view .LVU295
+ 229:Core/Src/eprintf.c ****             putcf('-');
+ 1161              		.loc 1 229 14 is_stmt 0 view .LVU296
+ 1162 01cc B5EEC08A 		vcmpe.f32	s16, #0
+ 1163 01d0 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 1164 01d4 27D4     		bmi	.L90
+ 1165              	.LVL130:
+ 1166              	.L79:
+ 234:Core/Src/eprintf.c ****           putcf('.'); len++;
+ 1167              		.loc 1 234 11 is_stmt 1 view .LVU297
+ 234:Core/Src/eprintf.c ****           putcf('.'); len++;
+ 1168              		.loc 1 234 32 is_stmt 0 view .LVU298
+ 1169 01d6 FDEEC88A 		vcvt.s32.f32	s17, s16
+ 234:Core/Src/eprintf.c ****           putcf('.'); len++;
+ 1170              		.loc 1 234 18 view .LVU299
+ 1171 01da 0023     		movs	r3, #0
+ 1172 01dc 0093     		str	r3, [sp]
+ 1173 01de 18EE902A 		vmov	r2, s17	@ int
+ 1174 01e2 D317     		asrs	r3, r2, #31
+ 1175 01e4 2846     		mov	r0, r5
+ 1176 01e6 FFF7FEFF 		bl	itoa10
+ 1177              	.LVL131:
+ 234:Core/Src/eprintf.c ****           putcf('.'); len++;
+ 1178              		.loc 1 234 15 view .LVU300
+ 1179 01ea 0444     		add	r4, r4, r0
+ 1180              	.LVL132:
+ 235:Core/Src/eprintf.c ****           len += itoa10(putcf, (num - (int)num) * power(10, precision), precision);
+ 1181              		.loc 1 235 11 is_stmt 1 view .LVU301
+ 1182 01ec 2E20     		movs	r0, #46
+ 1183 01ee A847     		blx	r5
+ 1184              	.LVL133:
+ 235:Core/Src/eprintf.c ****           len += itoa10(putcf, (num - (int)num) * power(10, precision), precision);
+ 1185              		.loc 1 235 23 view .LVU302
+ 235:Core/Src/eprintf.c ****           len += itoa10(putcf, (num - (int)num) * power(10, precision), precision);
+ 1186              		.loc 1 235 26 is_stmt 0 view .LVU303
+ 1187 01f0 0134     		adds	r4, r4, #1
+ 1188              	.LVL134:
+ 236:Core/Src/eprintf.c ****           break;
+ 1189              		.loc 1 236 11 is_stmt 1 view .LVU304
+ 236:Core/Src/eprintf.c ****           break;
+ 1190              		.loc 1 236 37 is_stmt 0 view .LVU305
+ 1191 01f2 F8EEE88A 		vcvt.f32.s32	s17, s17
+ 1192 01f6 38EE688A 		vsub.f32	s16, s16, s17
+ 1193              	.LVL135:
+ 236:Core/Src/eprintf.c ****           break;
+ 1194              		.loc 1 236 51 view .LVU306
+ 1195 01fa 3146     		mov	r1, r6
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 29
+
+
+ 1196 01fc 0A20     		movs	r0, #10
+ 1197 01fe FFF7FEFF 		bl	power
+ 1198              	.LVL136:
+ 1199 0202 07EE900A 		vmov	s15, r0	@ int
+ 236:Core/Src/eprintf.c ****           break;
+ 1200              		.loc 1 236 49 view .LVU307
+ 1201 0206 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 236:Core/Src/eprintf.c ****           break;
+ 1202              		.loc 1 236 18 view .LVU308
+ 1203 020a 67EE887A 		vmul.f32	s15, s15, s16
+ 1204 020e 17EE900A 		vmov	r0, s15
+ 1205 0212 FFF7FEFF 		bl	__aeabi_f2lz
+ 1206              	.LVL137:
+ 1207 0216 0246     		mov	r2, r0
+ 1208 0218 0B46     		mov	r3, r1
+ 1209 021a 0096     		str	r6, [sp]
+ 1210 021c 2846     		mov	r0, r5
+ 1211 021e FFF7FEFF 		bl	itoa10
+ 1212              	.LVL138:
+ 236:Core/Src/eprintf.c ****           break;
+ 1213              		.loc 1 236 15 view .LVU309
+ 1214 0222 0444     		add	r4, r4, r0
+ 1215              	.LVL139:
+ 237:Core/Src/eprintf.c ****         case 's':
+ 1216              		.loc 1 237 11 is_stmt 1 view .LVU310
+ 1217 0224 F4E6     		b	.L59
+ 1218              	.LVL140:
+ 1219              	.L90:
+ 230:Core/Src/eprintf.c ****             num = -num;
+ 1220              		.loc 1 230 13 view .LVU311
+ 1221 0226 2D20     		movs	r0, #45
+ 1222              	.LVL141:
+ 230:Core/Src/eprintf.c ****             num = -num;
+ 1223              		.loc 1 230 13 is_stmt 0 view .LVU312
+ 1224 0228 A847     		blx	r5
+ 1225              	.LVL142:
+ 231:Core/Src/eprintf.c ****             len++;
+ 1226              		.loc 1 231 13 is_stmt 1 view .LVU313
+ 231:Core/Src/eprintf.c ****             len++;
+ 1227              		.loc 1 231 17 is_stmt 0 view .LVU314
+ 1228 022a B1EE488A 		vneg.f32	s16, s16
+ 1229              	.LVL143:
+ 232:Core/Src/eprintf.c ****           }
+ 1230              		.loc 1 232 13 is_stmt 1 view .LVU315
+ 232:Core/Src/eprintf.c ****           }
+ 1231              		.loc 1 232 16 is_stmt 0 view .LVU316
+ 1232 022e 0134     		adds	r4, r4, #1
+ 1233              	.LVL144:
+ 232:Core/Src/eprintf.c ****           }
+ 1234              		.loc 1 232 16 view .LVU317
+ 1235 0230 D1E7     		b	.L79
+ 1236              	.LVL145:
+ 1237              	.L73:
+ 239:Core/Src/eprintf.c ****           while (*str) {
+ 1238              		.loc 1 239 11 is_stmt 1 view .LVU318
+ 239:Core/Src/eprintf.c ****           while (*str) {
+ 1239              		.loc 1 239 15 is_stmt 0 view .LVU319
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 30
+
+
+ 1240 0232 029B     		ldr	r3, [sp, #8]
+ 1241              	.LVL146:
+ 239:Core/Src/eprintf.c ****           while (*str) {
+ 1242              		.loc 1 239 15 view .LVU320
+ 1243 0234 1A1D     		adds	r2, r3, #4
+ 1244 0236 0292     		str	r2, [sp, #8]
+ 1245 0238 1E68     		ldr	r6, [r3]
+ 1246              	.LVL147:
+ 240:Core/Src/eprintf.c ****             putcf(*str++);
+ 1247              		.loc 1 240 11 is_stmt 1 view .LVU321
+ 240:Core/Src/eprintf.c ****             putcf(*str++);
+ 1248              		.loc 1 240 17 is_stmt 0 view .LVU322
+ 1249 023a 02E0     		b	.L81
+ 1250              	.LVL148:
+ 1251              	.L82:
+ 241:Core/Src/eprintf.c ****             len++;
+ 1252              		.loc 1 241 13 is_stmt 1 view .LVU323
+ 241:Core/Src/eprintf.c ****             len++;
+ 1253              		.loc 1 241 23 is_stmt 0 view .LVU324
+ 1254 023c 0136     		adds	r6, r6, #1
+ 1255              	.LVL149:
+ 241:Core/Src/eprintf.c ****             len++;
+ 1256              		.loc 1 241 13 view .LVU325
+ 1257 023e A847     		blx	r5
+ 1258              	.LVL150:
+ 242:Core/Src/eprintf.c ****           }
+ 1259              		.loc 1 242 13 is_stmt 1 view .LVU326
+ 242:Core/Src/eprintf.c ****           }
+ 1260              		.loc 1 242 16 is_stmt 0 view .LVU327
+ 1261 0240 0134     		adds	r4, r4, #1
+ 1262              	.LVL151:
+ 1263              	.L81:
+ 240:Core/Src/eprintf.c ****             putcf(*str++);
+ 1264              		.loc 1 240 17 is_stmt 1 view .LVU328
+ 240:Core/Src/eprintf.c ****             putcf(*str++);
+ 1265              		.loc 1 240 18 is_stmt 0 view .LVU329
+ 1266 0242 3078     		ldrb	r0, [r6]	@ zero_extendqisi2
+ 240:Core/Src/eprintf.c ****             putcf(*str++);
+ 1267              		.loc 1 240 17 view .LVU330
+ 1268 0244 0028     		cmp	r0, #0
+ 1269 0246 F9D1     		bne	.L82
+ 240:Core/Src/eprintf.c ****             putcf(*str++);
+ 1270              		.loc 1 240 17 view .LVU331
+ 1271 0248 E2E6     		b	.L59
+ 1272              	.LVL152:
+ 1273              	.L77:
+ 246:Core/Src/eprintf.c ****           len++;
+ 1274              		.loc 1 246 11 is_stmt 1 view .LVU332
+ 246:Core/Src/eprintf.c ****           len++;
+ 1275              		.loc 1 246 24 is_stmt 0 view .LVU333
+ 1276 024a 029B     		ldr	r3, [sp, #8]
+ 1277              	.LVL153:
+ 246:Core/Src/eprintf.c ****           len++;
+ 1278              		.loc 1 246 24 view .LVU334
+ 1279 024c 1A1D     		adds	r2, r3, #4
+ 1280 024e 0292     		str	r2, [sp, #8]
+ 246:Core/Src/eprintf.c ****           len++;
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 31
+
+
+ 1281              		.loc 1 246 11 view .LVU335
+ 1282 0250 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 1283 0252 A847     		blx	r5
+ 1284              	.LVL154:
+ 247:Core/Src/eprintf.c ****           break;
+ 1285              		.loc 1 247 11 is_stmt 1 view .LVU336
+ 247:Core/Src/eprintf.c ****           break;
+ 1286              		.loc 1 247 14 is_stmt 0 view .LVU337
+ 1287 0254 0134     		adds	r4, r4, #1
+ 1288              	.LVL155:
+ 248:Core/Src/eprintf.c ****         default:
+ 1289              		.loc 1 248 11 is_stmt 1 view .LVU338
+ 1290 0256 DBE6     		b	.L59
+ 1291              	.LVL156:
+ 1292              	.L86:
+ 255:Core/Src/eprintf.c ****     }
+ 256:Core/Src/eprintf.c ****   }
+ 257:Core/Src/eprintf.c ****   
+ 258:Core/Src/eprintf.c ****   return len;
+ 1293              		.loc 1 258 3 view .LVU339
+ 259:Core/Src/eprintf.c **** }
+ 1294              		.loc 1 259 1 is_stmt 0 view .LVU340
+ 1295 0258 2046     		mov	r0, r4
+ 1296 025a 05B0     		add	sp, sp, #20
+ 1297              	.LCFI12:
+ 1298              		.cfi_def_cfa_offset 28
+ 1299              		@ sp needed
+ 1300 025c BDEC028B 		vldm	sp!, {d8}
+ 1301              	.LCFI13:
+ 1302              		.cfi_restore 80
+ 1303              		.cfi_restore 81
+ 1304              		.cfi_def_cfa_offset 20
+ 1305 0260 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1306              	.LVL157:
+ 1307              	.L92:
+ 1308              		.loc 1 259 1 view .LVU341
+ 1309 0262 00BF     		.align	2
+ 1310              	.L91:
+ 1311 0264 01000000 		.word	_ctype_+1
+ 1312              		.cfi_endproc
+ 1313              	.LFE8:
+ 1315              		.section	.text.eprintf,"ax",%progbits
+ 1316              		.align	1
+ 1317              		.global	eprintf
+ 1318              		.syntax unified
+ 1319              		.thumb
+ 1320              		.thumb_func
+ 1322              	eprintf:
+ 1323              	.LVL158:
+ 1324              	.LFB9:
+ 260:Core/Src/eprintf.c **** 
+ 261:Core/Src/eprintf.c **** int eprintf(putc_t putcf, const char * fmt, ...) {
+ 1325              		.loc 1 261 50 is_stmt 1 view -0
+ 1326              		.cfi_startproc
+ 1327              		@ args = 4, pretend = 12, frame = 8
+ 1328              		@ frame_needed = 0, uses_anonymous_args = 1
+ 1329              		.loc 1 261 50 is_stmt 0 view .LVU343
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 32
+
+
+ 1330 0000 0EB4     		push	{r1, r2, r3}
+ 1331              	.LCFI14:
+ 1332              		.cfi_def_cfa_offset 12
+ 1333              		.cfi_offset 1, -12
+ 1334              		.cfi_offset 2, -8
+ 1335              		.cfi_offset 3, -4
+ 1336 0002 00B5     		push	{lr}
+ 1337              	.LCFI15:
+ 1338              		.cfi_def_cfa_offset 16
+ 1339              		.cfi_offset 14, -16
+ 1340 0004 82B0     		sub	sp, sp, #8
+ 1341              	.LCFI16:
+ 1342              		.cfi_def_cfa_offset 24
+ 1343 0006 03AA     		add	r2, sp, #12
+ 1344 0008 52F8041B 		ldr	r1, [r2], #4
+ 262:Core/Src/eprintf.c ****   va_list ap;
+ 1345              		.loc 1 262 3 is_stmt 1 view .LVU344
+ 263:Core/Src/eprintf.c ****   int len;
+ 1346              		.loc 1 263 3 view .LVU345
+ 264:Core/Src/eprintf.c **** 
+ 265:Core/Src/eprintf.c ****   va_start(ap, fmt);
+ 1347              		.loc 1 265 3 view .LVU346
+ 1348 000c 0192     		str	r2, [sp, #4]
+ 266:Core/Src/eprintf.c ****   len = evprintf(putcf, fmt, ap);
+ 1349              		.loc 1 266 3 view .LVU347
+ 1350              		.loc 1 266 9 is_stmt 0 view .LVU348
+ 1351 000e FFF7FEFF 		bl	evprintf
+ 1352              	.LVL159:
+ 267:Core/Src/eprintf.c ****   va_end(ap);
+ 1353              		.loc 1 267 3 is_stmt 1 view .LVU349
+ 268:Core/Src/eprintf.c **** 
+ 269:Core/Src/eprintf.c ****   return len;
+ 1354              		.loc 1 269 3 view .LVU350
+ 270:Core/Src/eprintf.c **** }
+ 1355              		.loc 1 270 1 is_stmt 0 view .LVU351
+ 1356 0012 02B0     		add	sp, sp, #8
+ 1357              	.LCFI17:
+ 1358              		.cfi_def_cfa_offset 16
+ 1359              		@ sp needed
+ 1360 0014 5DF804EB 		ldr	lr, [sp], #4
+ 1361              	.LCFI18:
+ 1362              		.cfi_restore 14
+ 1363              		.cfi_def_cfa_offset 12
+ 1364 0018 03B0     		add	sp, sp, #12
+ 1365              	.LCFI19:
+ 1366              		.cfi_restore 3
+ 1367              		.cfi_restore 2
+ 1368              		.cfi_restore 1
+ 1369              		.cfi_def_cfa_offset 0
+ 1370 001a 7047     		bx	lr
+ 1371              		.cfi_endproc
+ 1372              	.LFE9:
+ 1374              		.section	.rodata.digit,"a"
+ 1375              		.align	2
+ 1376              		.set	.LANCHOR0,. + 0
+ 1379              	digit:
+ 1380 0000 30313233 		.ascii	"0123456789ABCDEF"
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 33
+
+
+ 1380      34353637 
+ 1380      38394142 
+ 1380      43444546 
+ 1381              		.text
+ 1382              	.Letext0:
+ 1383              		.file 2 "/Applications/ARM/lib/gcc/arm-none-eabi/10.3.1/include/stdarg.h"
+ 1384              		.file 3 "Core/Inc/eprintf.h"
+ 1385              		.file 4 "/Applications/ARM/arm-none-eabi/include/machine/_default_types.h"
+ 1386              		.file 5 "/Applications/ARM/arm-none-eabi/include/sys/_stdint.h"
+ 1387              		.file 6 "/Applications/ARM/arm-none-eabi/include/ctype.h"
+ 1388              		.file 7 "<built-in>"
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s 			page 34
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 eprintf.c
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:20     .text.getIntLen:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:25     .text.getIntLen:0000000000000000 getIntLen
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:69     .text.getIntLen:000000000000001c $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:75     .text.itoa10Unsigned:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:80     .text.itoa10Unsigned:0000000000000000 itoa10Unsigned
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:210    .text.itoa10Unsigned:0000000000000094 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:215    .text.itoa10:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:220    .text.itoa10:0000000000000000 itoa10
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:351    .text.itoa16:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:356    .text.itoa16:0000000000000000 itoa16
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:504    .text.itoa16:0000000000000080 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:509    .text.handleLongLong:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:514    .text.handleLongLong:0000000000000000 handleLongLong
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:548    .text.handleLongLong:0000000000000016 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:629    .text.handleLong:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:634    .text.handleLong:0000000000000000 handleLong
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:668    .text.handleLong:0000000000000016 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:757    .text.power:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:763    .text.power:0000000000000000 power
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:808    .text.evprintf:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:814    .text.evprintf:0000000000000000 evprintf
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:993    .text.evprintf:00000000000000a4 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:1026   .text.evprintf:0000000000000128 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:1311   .text.evprintf:0000000000000264 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:1316   .text.eprintf:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:1322   .text.eprintf:0000000000000000 eprintf
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:1375   .rodata.digit:0000000000000000 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:1379   .rodata.digit:0000000000000000 digit
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:581    .text.handleLongLong:0000000000000037 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:581    .text.handleLongLong:0000000000000038 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:701    .text.handleLong:0000000000000037 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccBod2qX.s:701    .text.handleLong:0000000000000038 $t
+
+UNDEFINED SYMBOLS
+__aeabi_uldivmod
+__aeabi_d2f
+__aeabi_f2lz
+_ctype_

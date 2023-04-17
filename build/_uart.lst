@@ -1,0 +1,97 @@
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccmassGJ.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"_uart.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.debugUartPutchar,"ax",%progbits
+  20              		.align	1
+  21              		.global	debugUartPutchar
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	debugUartPutchar:
+  27              	.LVL0:
+  28              	.LFB130:
+  29              		.file 1 "Core/Src/_uart.c"
+   1:Core/Src/_uart.c **** #include "_uart.h"
+   2:Core/Src/_uart.c **** 
+   3:Core/Src/_uart.c **** int debugUartPutchar(int c) {
+  30              		.loc 1 3 29 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 8
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		.loc 1 3 29 is_stmt 0 view .LVU1
+  35 0000 00B5     		push	{lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 4
+  38              		.cfi_offset 14, -4
+  39 0002 83B0     		sub	sp, sp, #12
+  40              	.LCFI1:
+  41              		.cfi_def_cfa_offset 16
+  42 0004 0190     		str	r0, [sp, #4]
+   4:Core/Src/_uart.c **** 	HAL_UART_Transmit(&huart3, (uint8_t*) &c, 1, 100);
+  43              		.loc 1 4 2 is_stmt 1 view .LVU2
+  44 0006 6423     		movs	r3, #100
+  45 0008 0122     		movs	r2, #1
+  46 000a 01A9     		add	r1, sp, #4
+  47 000c 0348     		ldr	r0, .L3
+  48              	.LVL1:
+  49              		.loc 1 4 2 is_stmt 0 view .LVU3
+  50 000e FFF7FEFF 		bl	HAL_UART_Transmit
+  51              	.LVL2:
+   5:Core/Src/_uart.c **** 	return (unsigned char) c;
+  52              		.loc 1 5 2 is_stmt 1 view .LVU4
+   6:Core/Src/_uart.c **** }...
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccmassGJ.s 			page 2
+
+
+  53              		.loc 1 6 1 is_stmt 0 view .LVU5
+  54 0012 9DF80400 		ldrb	r0, [sp, #4]	@ zero_extendqisi2
+  55 0016 03B0     		add	sp, sp, #12
+  56              	.LCFI2:
+  57              		.cfi_def_cfa_offset 4
+  58              		@ sp needed
+  59 0018 5DF804FB 		ldr	pc, [sp], #4
+  60              	.L4:
+  61              		.align	2
+  62              	.L3:
+  63 001c 00000000 		.word	huart3
+  64              		.cfi_endproc
+  65              	.LFE130:
+  67              		.text
+  68              	.Letext0:
+  69              		.file 2 "/Applications/ARM/arm-none-eabi/include/machine/_default_types.h"
+  70              		.file 3 "/Applications/ARM/arm-none-eabi/include/sys/_stdint.h"
+  71              		.file 4 "Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h"
+  72              		.file 5 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h"
+  73              		.file 6 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h"
+  74              		.file 7 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h"
+  75              		.file 8 "Core/Inc/usart.h"
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccmassGJ.s 			page 3
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 _uart.c
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccmassGJ.s:20     .text.debugUartPutchar:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccmassGJ.s:26     .text.debugUartPutchar:0000000000000000 debugUartPutchar
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//ccmassGJ.s:63     .text.debugUartPutchar:000000000000001c $d
+
+UNDEFINED SYMBOLS
+HAL_UART_Transmit
+huart3

@@ -1,0 +1,483 @@
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"_i2c.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.getOsSemaphoreAttr_t,"ax",%progbits
+  20              		.align	1
+  21              		.global	getOsSemaphoreAttr_t
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	getOsSemaphoreAttr_t:
+  27              	.LVL0:
+  28              	.LFB134:
+  29              		.file 1 "Core/Src/_i2c.c"
+   1:Core/Src/_i2c.c **** #include <string.h>
+   2:Core/Src/_i2c.c **** 
+   3:Core/Src/_i2c.c **** #include "_i2c.h"
+   4:Core/Src/_i2c.c **** 
+   5:Core/Src/_i2c.c **** I2CDrv sensorI2C;
+   6:Core/Src/_i2c.c **** 
+   7:Core/Src/_i2c.c **** osSemaphoreAttr_t* getOsSemaphoreAttr_t(char* name, void* cb_mem, uint32_t cb_size) {
+  30              		.loc 1 7 85 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
+  35              		.loc 1 7 85 is_stmt 0 view .LVU1
+  36 0000 10B4     		push	{r4}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 4
+  39              		.cfi_offset 4, -4
+   8:Core/Src/_i2c.c ****     static osSemaphoreAttr_t attr;
+  40              		.loc 1 8 5 is_stmt 1 view .LVU2
+   9:Core/Src/_i2c.c ****     memset(&attr, 0, sizeof(attr));
+  41              		.loc 1 9 5 view .LVU3
+  42 0002 064B     		ldr	r3, .L3
+  43 0004 0024     		movs	r4, #0
+  44 0006 1C60     		str	r4, [r3]
+  45 0008 5C60     		str	r4, [r3, #4]
+  46 000a 9C60     		str	r4, [r3, #8]
+  47 000c DC60     		str	r4, [r3, #12]
+  10:Core/Src/_i2c.c ****     attr.name = name;
+  48              		.loc 1 10 5 view .LVU4
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 2
+
+
+  49              		.loc 1 10 15 is_stmt 0 view .LVU5
+  50 000e 1860     		str	r0, [r3]
+  11:Core/Src/_i2c.c ****     attr.cb_mem = cb_mem;
+  51              		.loc 1 11 5 is_stmt 1 view .LVU6
+  52              		.loc 1 11 17 is_stmt 0 view .LVU7
+  53 0010 9960     		str	r1, [r3, #8]
+  12:Core/Src/_i2c.c ****     attr.cb_size = cb_size;
+  54              		.loc 1 12 5 is_stmt 1 view .LVU8
+  55              		.loc 1 12 18 is_stmt 0 view .LVU9
+  56 0012 DA60     		str	r2, [r3, #12]
+  13:Core/Src/_i2c.c ****     return &attr;
+  57              		.loc 1 13 5 is_stmt 1 view .LVU10
+  14:Core/Src/_i2c.c **** }
+  58              		.loc 1 14 1 is_stmt 0 view .LVU11
+  59 0014 1846     		mov	r0, r3
+  60              	.LVL1:
+  61              		.loc 1 14 1 view .LVU12
+  62 0016 5DF8044B 		ldr	r4, [sp], #4
+  63              	.LCFI1:
+  64              		.cfi_restore 4
+  65              		.cfi_def_cfa_offset 0
+  66 001a 7047     		bx	lr
+  67              	.L4:
+  68              		.align	2
+  69              	.L3:
+  70 001c 00000000 		.word	.LANCHOR0
+  71              		.cfi_endproc
+  72              	.LFE134:
+  74              		.section	.rodata._I2C_Init.str1.4,"aMS",%progbits,1
+  75              		.align	2
+  76              	.LC0:
+  77 0000 53454E53 		.ascii	"SENSORI2C\000"
+  77      4F524932 
+  77      4300
+  78              		.section	.text._I2C_Init,"ax",%progbits
+  79              		.align	1
+  80              		.global	_I2C_Init
+  81              		.syntax unified
+  82              		.thumb
+  83              		.thumb_func
+  85              	_I2C_Init:
+  86              	.LFB135:
+  15:Core/Src/_i2c.c **** 
+  16:Core/Src/_i2c.c **** void _I2C_Init() {
+  87              		.loc 1 16 18 is_stmt 1 view -0
+  88              		.cfi_startproc
+  89              		@ args = 0, pretend = 0, frame = 0
+  90              		@ frame_needed = 0, uses_anonymous_args = 0
+  91 0000 10B5     		push	{r4, lr}
+  92              	.LCFI2:
+  93              		.cfi_def_cfa_offset 8
+  94              		.cfi_offset 4, -8
+  95              		.cfi_offset 14, -4
+  17:Core/Src/_i2c.c **** 	sensorI2C.hi2c = &hi2c3;
+  96              		.loc 1 17 2 view .LVU14
+  97              		.loc 1 17 17 is_stmt 0 view .LVU15
+  98 0002 084C     		ldr	r4, .L7
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 3
+
+
+  99 0004 2146     		mov	r1, r4
+ 100 0006 084B     		ldr	r3, .L7+4
+ 101 0008 41F8083B 		str	r3, [r1], #8
+  18:Core/Src/_i2c.c **** 	sensorI2C.i2cRxDmaSemaphore = osSemaphoreNew(1, 0, getOsSemaphoreAttr_t("SENSORI2C", &sensorI2C.i2
+ 102              		.loc 1 18 2 is_stmt 1 view .LVU16
+ 103              		.loc 1 18 53 is_stmt 0 view .LVU17
+ 104 000c 5022     		movs	r2, #80
+ 105 000e 0748     		ldr	r0, .L7+8
+ 106 0010 FFF7FEFF 		bl	getOsSemaphoreAttr_t
+ 107              	.LVL2:
+ 108 0014 0246     		mov	r2, r0
+ 109              		.loc 1 18 32 view .LVU18
+ 110 0016 0021     		movs	r1, #0
+ 111 0018 0120     		movs	r0, #1
+ 112 001a FFF7FEFF 		bl	osSemaphoreNew
+ 113              	.LVL3:
+ 114              		.loc 1 18 30 view .LVU19
+ 115 001e 6060     		str	r0, [r4, #4]
+  19:Core/Src/_i2c.c **** }
+ 116              		.loc 1 19 1 view .LVU20
+ 117 0020 10BD     		pop	{r4, pc}
+ 118              	.L8:
+ 119 0022 00BF     		.align	2
+ 120              	.L7:
+ 121 0024 00000000 		.word	.LANCHOR1
+ 122 0028 00000000 		.word	hi2c3
+ 123 002c 00000000 		.word	.LC0
+ 124              		.cfi_endproc
+ 125              	.LFE135:
+ 127              		.section	.text.i2cSensorsRead,"ax",%progbits
+ 128              		.align	1
+ 129              		.global	i2cSensorsRead
+ 130              		.syntax unified
+ 131              		.thumb
+ 132              		.thumb_func
+ 134              	i2cSensorsRead:
+ 135              	.LVL4:
+ 136              	.LFB136:
+  20:Core/Src/_i2c.c **** 
+  21:Core/Src/_i2c.c **** 
+  22:Core/Src/_i2c.c **** /*! @brief Sensor I2C read function */
+  23:Core/Src/_i2c.c **** int8_t i2cSensorsRead(uint8_t regAddr, uint8_t *regData, uint32_t len, void *intfPtr) {
+ 137              		.loc 1 23 87 is_stmt 1 view -0
+ 138              		.cfi_startproc
+ 139              		@ args = 0, pretend = 0, frame = 8
+ 140              		@ frame_needed = 0, uses_anonymous_args = 0
+ 141              		.loc 1 23 87 is_stmt 0 view .LVU22
+ 142 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 143              	.LCFI3:
+ 144              		.cfi_def_cfa_offset 20
+ 145              		.cfi_offset 4, -20
+ 146              		.cfi_offset 5, -16
+ 147              		.cfi_offset 6, -12
+ 148              		.cfi_offset 7, -8
+ 149              		.cfi_offset 14, -4
+ 150 0002 85B0     		sub	sp, sp, #20
+ 151              	.LCFI4:
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 4
+
+
+ 152              		.cfi_def_cfa_offset 40
+ 153 0004 0E46     		mov	r6, r1
+ 154 0006 1746     		mov	r7, r2
+ 155 0008 8DF80F00 		strb	r0, [sp, #15]
+  24:Core/Src/_i2c.c **** 	HAL_StatusTypeDef status;
+ 156              		.loc 1 24 2 is_stmt 1 view .LVU23
+  25:Core/Src/_i2c.c **** 	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
+ 157              		.loc 1 25 2 view .LVU24
+ 158              		.loc 1 25 24 is_stmt 0 view .LVU25
+ 159 000c 1C78     		ldrb	r4, [r3]	@ zero_extendqisi2
+ 160              		.loc 1 25 11 view .LVU26
+ 161 000e 6400     		lsls	r4, r4, #1
+ 162              	.LVL5:
+  26:Core/Src/_i2c.c **** 	HAL_I2C_Master_Transmit(sensorI2C.hi2c, DevAddress, &regAddr, 1, 1000);
+ 163              		.loc 1 26 2 is_stmt 1 view .LVU27
+ 164 0010 0D4D     		ldr	r5, .L11
+ 165 0012 4FF47A73 		mov	r3, #1000
+ 166              	.LVL6:
+ 167              		.loc 1 26 2 is_stmt 0 view .LVU28
+ 168 0016 0093     		str	r3, [sp]
+ 169 0018 0123     		movs	r3, #1
+ 170 001a 0DF10F02 		add	r2, sp, #15
+ 171              	.LVL7:
+ 172              		.loc 1 26 2 view .LVU29
+ 173 001e 2146     		mov	r1, r4
+ 174              	.LVL8:
+ 175              		.loc 1 26 2 view .LVU30
+ 176 0020 2868     		ldr	r0, [r5]
+ 177              	.LVL9:
+ 178              		.loc 1 26 2 view .LVU31
+ 179 0022 FFF7FEFF 		bl	HAL_I2C_Master_Transmit
+ 180              	.LVL10:
+  27:Core/Src/_i2c.c **** 	status = HAL_I2C_Master_Receive_DMA(sensorI2C.hi2c, DevAddress, regData, len);
+ 181              		.loc 1 27 2 is_stmt 1 view .LVU32
+ 182              		.loc 1 27 11 is_stmt 0 view .LVU33
+ 183 0026 BBB2     		uxth	r3, r7
+ 184 0028 3246     		mov	r2, r6
+ 185 002a 2146     		mov	r1, r4
+ 186 002c 2868     		ldr	r0, [r5]
+ 187 002e FFF7FEFF 		bl	HAL_I2C_Master_Receive_DMA
+ 188              	.LVL11:
+ 189 0032 0446     		mov	r4, r0
+ 190              	.LVL12:
+  28:Core/Src/_i2c.c **** 	osSemaphoreAcquire(sensorI2C.i2cRxDmaSemaphore, osWaitForever);
+ 191              		.loc 1 28 2 is_stmt 1 view .LVU34
+ 192 0034 4FF0FF31 		mov	r1, #-1
+ 193 0038 6868     		ldr	r0, [r5, #4]
+ 194 003a FFF7FEFF 		bl	osSemaphoreAcquire
+ 195              	.LVL13:
+  29:Core/Src/_i2c.c **** 	/**
+  30:Core/Src/_i2c.c **** 	 * HAL_StatusTypeDef: 0, 1, 2, 3
+  31:Core/Src/_i2c.c **** 	 * BMI08X_INTF_RET_TYPE: 0, -1, -2, ..., -9
+  32:Core/Src/_i2c.c **** 	 */
+  33:Core/Src/_i2c.c **** 	return -status;
+ 196              		.loc 1 33 2 view .LVU35
+ 197              		.loc 1 33 9 is_stmt 0 view .LVU36
+ 198 003e 6042     		rsbs	r0, r4, #0
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 5
+
+
+  34:Core/Src/_i2c.c **** }
+ 199              		.loc 1 34 1 view .LVU37
+ 200 0040 40B2     		sxtb	r0, r0
+ 201 0042 05B0     		add	sp, sp, #20
+ 202              	.LCFI5:
+ 203              		.cfi_def_cfa_offset 20
+ 204              		@ sp needed
+ 205 0044 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 206              	.LVL14:
+ 207              	.L12:
+ 208              		.loc 1 34 1 view .LVU38
+ 209 0046 00BF     		.align	2
+ 210              	.L11:
+ 211 0048 00000000 		.word	.LANCHOR1
+ 212              		.cfi_endproc
+ 213              	.LFE136:
+ 215              		.section	.text.i2cSensorsWrite,"ax",%progbits
+ 216              		.align	1
+ 217              		.global	i2cSensorsWrite
+ 218              		.syntax unified
+ 219              		.thumb
+ 220              		.thumb_func
+ 222              	i2cSensorsWrite:
+ 223              	.LVL15:
+ 224              	.LFB137:
+  35:Core/Src/_i2c.c **** 
+  36:Core/Src/_i2c.c **** /*! @brief Sensor I2C write function */
+  37:Core/Src/_i2c.c **** int8_t i2cSensorsWrite(uint8_t regAddr, const uint8_t *regData, uint32_t len, void *intfPtr) {
+ 225              		.loc 1 37 94 is_stmt 1 view -0
+ 226              		.cfi_startproc
+ 227              		@ args = 0, pretend = 0, frame = 0
+ 228              		@ frame_needed = 0, uses_anonymous_args = 0
+ 229              		.loc 1 37 94 is_stmt 0 view .LVU40
+ 230 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 231              	.LCFI6:
+ 232              		.cfi_def_cfa_offset 24
+ 233              		.cfi_offset 4, -24
+ 234              		.cfi_offset 5, -20
+ 235              		.cfi_offset 6, -16
+ 236              		.cfi_offset 7, -12
+ 237              		.cfi_offset 8, -8
+ 238              		.cfi_offset 14, -4
+ 239 0004 82B0     		sub	sp, sp, #8
+ 240              	.LCFI7:
+ 241              		.cfi_def_cfa_offset 32
+ 242 0006 8046     		mov	r8, r0
+ 243 0008 0F46     		mov	r7, r1
+ 244 000a 1446     		mov	r4, r2
+  38:Core/Src/_i2c.c **** 	static uint8_t sBuffer[256];
+ 245              		.loc 1 38 2 is_stmt 1 view .LVU41
+  39:Core/Src/_i2c.c **** 	HAL_StatusTypeDef status;
+ 246              		.loc 1 39 2 view .LVU42
+  40:Core/Src/_i2c.c **** 	uint16_t DevAddress = *(uint8_t*)intfPtr << 1;
+ 247              		.loc 1 40 2 view .LVU43
+ 248              		.loc 1 40 24 is_stmt 0 view .LVU44
+ 249 000c 1D78     		ldrb	r5, [r3]	@ zero_extendqisi2
+ 250              		.loc 1 40 11 view .LVU45
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 6
+
+
+ 251 000e 6D00     		lsls	r5, r5, #1
+ 252              	.LVL16:
+  41:Core/Src/_i2c.c **** 	memset(sBuffer, 0, 256);
+ 253              		.loc 1 41 2 is_stmt 1 view .LVU46
+ 254 0010 0E4E     		ldr	r6, .L15
+ 255 0012 4FF48072 		mov	r2, #256
+ 256              	.LVL17:
+ 257              		.loc 1 41 2 is_stmt 0 view .LVU47
+ 258 0016 0021     		movs	r1, #0
+ 259              	.LVL18:
+ 260              		.loc 1 41 2 view .LVU48
+ 261 0018 3046     		mov	r0, r6
+ 262              	.LVL19:
+ 263              		.loc 1 41 2 view .LVU49
+ 264 001a FFF7FEFF 		bl	memset
+ 265              	.LVL20:
+  42:Core/Src/_i2c.c **** 	sBuffer[0] = regAddr;
+ 266              		.loc 1 42 2 is_stmt 1 view .LVU50
+ 267              		.loc 1 42 13 is_stmt 0 view .LVU51
+ 268 001e 3046     		mov	r0, r6
+ 269 0020 00F8018B 		strb	r8, [r0], #1
+  43:Core/Src/_i2c.c **** 	memcpy(sBuffer + 1, regData, len);
+ 270              		.loc 1 43 2 is_stmt 1 view .LVU52
+ 271 0024 2246     		mov	r2, r4
+ 272 0026 3946     		mov	r1, r7
+ 273 0028 FFF7FEFF 		bl	memcpy
+ 274              	.LVL21:
+  44:Core/Src/_i2c.c **** 	status = HAL_I2C_Master_Transmit(sensorI2C.hi2c, DevAddress, sBuffer, len + 1, 1000);
+ 275              		.loc 1 44 2 view .LVU53
+ 276              		.loc 1 44 11 is_stmt 0 view .LVU54
+ 277 002c 631C     		adds	r3, r4, #1
+ 278 002e 4FF47A72 		mov	r2, #1000
+ 279 0032 0092     		str	r2, [sp]
+ 280 0034 9BB2     		uxth	r3, r3
+ 281 0036 3246     		mov	r2, r6
+ 282 0038 2946     		mov	r1, r5
+ 283 003a 0548     		ldr	r0, .L15+4
+ 284 003c 0068     		ldr	r0, [r0]
+ 285 003e FFF7FEFF 		bl	HAL_I2C_Master_Transmit
+ 286              	.LVL22:
+  45:Core/Src/_i2c.c **** 	return -status;
+ 287              		.loc 1 45 2 is_stmt 1 view .LVU55
+ 288              		.loc 1 45 9 is_stmt 0 view .LVU56
+ 289 0042 4042     		rsbs	r0, r0, #0
+ 290              	.LVL23:
+  46:Core/Src/_i2c.c **** }
+ 291              		.loc 1 46 1 view .LVU57
+ 292 0044 40B2     		sxtb	r0, r0
+ 293 0046 02B0     		add	sp, sp, #8
+ 294              	.LCFI8:
+ 295              		.cfi_def_cfa_offset 24
+ 296              		@ sp needed
+ 297 0048 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 298              	.LVL24:
+ 299              	.L16:
+ 300              		.loc 1 46 1 view .LVU58
+ 301              		.align	2
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 7
+
+
+ 302              	.L15:
+ 303 004c 00000000 		.word	.LANCHOR2
+ 304 0050 00000000 		.word	.LANCHOR1
+ 305              		.cfi_endproc
+ 306              	.LFE137:
+ 308              		.section	.text.sensorsI2cRxDmaIsr,"ax",%progbits
+ 309              		.align	1
+ 310              		.global	sensorsI2cRxDmaIsr
+ 311              		.syntax unified
+ 312              		.thumb
+ 313              		.thumb_func
+ 315              	sensorsI2cRxDmaIsr:
+ 316              	.LFB138:
+  47:Core/Src/_i2c.c **** 
+  48:Core/Src/_i2c.c **** void sensorsI2cRxDmaIsr() {
+ 317              		.loc 1 48 27 is_stmt 1 view -0
+ 318              		.cfi_startproc
+ 319              		@ args = 0, pretend = 0, frame = 0
+ 320              		@ frame_needed = 0, uses_anonymous_args = 0
+ 321 0000 08B5     		push	{r3, lr}
+ 322              	.LCFI9:
+ 323              		.cfi_def_cfa_offset 8
+ 324              		.cfi_offset 3, -8
+ 325              		.cfi_offset 14, -4
+  49:Core/Src/_i2c.c **** 	osSemaphoreRelease(sensorI2C.i2cRxDmaSemaphore);
+ 326              		.loc 1 49 2 view .LVU60
+ 327 0002 024B     		ldr	r3, .L19
+ 328 0004 5868     		ldr	r0, [r3, #4]
+ 329 0006 FFF7FEFF 		bl	osSemaphoreRelease
+ 330              	.LVL25:
+  50:Core/Src/_i2c.c **** }...
+ 331              		.loc 1 50 1 is_stmt 0 view .LVU61
+ 332 000a 08BD     		pop	{r3, pc}
+ 333              	.L20:
+ 334              		.align	2
+ 335              	.L19:
+ 336 000c 00000000 		.word	.LANCHOR1
+ 337              		.cfi_endproc
+ 338              	.LFE138:
+ 340              		.global	sensorI2C
+ 341              		.section	.bss.attr.1,"aw",%nobits
+ 342              		.align	2
+ 343              		.set	.LANCHOR0,. + 0
+ 346              	attr.1:
+ 347 0000 00000000 		.space	16
+ 347      00000000 
+ 347      00000000 
+ 347      00000000 
+ 348              		.section	.bss.sBuffer.0,"aw",%nobits
+ 349              		.align	2
+ 350              		.set	.LANCHOR2,. + 0
+ 353              	sBuffer.0:
+ 354 0000 00000000 		.space	256
+ 354      00000000 
+ 354      00000000 
+ 354      00000000 
+ 354      00000000 
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 8
+
+
+ 355              		.section	.bss.sensorI2C,"aw",%nobits
+ 356              		.align	2
+ 357              		.set	.LANCHOR1,. + 0
+ 360              	sensorI2C:
+ 361 0000 00000000 		.space	88
+ 361      00000000 
+ 361      00000000 
+ 361      00000000 
+ 361      00000000 
+ 362              		.text
+ 363              	.Letext0:
+ 364              		.file 2 "/Applications/ARM/arm-none-eabi/include/machine/_default_types.h"
+ 365              		.file 3 "/Applications/ARM/arm-none-eabi/include/sys/_stdint.h"
+ 366              		.file 4 "Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h"
+ 367              		.file 5 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h"
+ 368              		.file 6 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h"
+ 369              		.file 7 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c.h"
+ 370              		.file 8 "Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h"
+ 371              		.file 9 "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h"
+ 372              		.file 10 "Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h"
+ 373              		.file 11 "Core/Inc/_i2c.h"
+ 374              		.file 12 "Core/Inc/i2c.h"
+ 375              		.file 13 "<built-in>"
+ARM GAS  /var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s 			page 9
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 _i2c.c
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:20     .text.getOsSemaphoreAttr_t:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:26     .text.getOsSemaphoreAttr_t:0000000000000000 getOsSemaphoreAttr_t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:70     .text.getOsSemaphoreAttr_t:000000000000001c $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:75     .rodata._I2C_Init.str1.4:0000000000000000 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:79     .text._I2C_Init:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:85     .text._I2C_Init:0000000000000000 _I2C_Init
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:121    .text._I2C_Init:0000000000000024 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:128    .text.i2cSensorsRead:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:134    .text.i2cSensorsRead:0000000000000000 i2cSensorsRead
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:211    .text.i2cSensorsRead:0000000000000048 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:216    .text.i2cSensorsWrite:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:222    .text.i2cSensorsWrite:0000000000000000 i2cSensorsWrite
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:303    .text.i2cSensorsWrite:000000000000004c $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:309    .text.sensorsI2cRxDmaIsr:0000000000000000 $t
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:315    .text.sensorsI2cRxDmaIsr:0000000000000000 sensorsI2cRxDmaIsr
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:336    .text.sensorsI2cRxDmaIsr:000000000000000c $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:360    .bss.sensorI2C:0000000000000000 sensorI2C
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:342    .bss.attr.1:0000000000000000 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:346    .bss.attr.1:0000000000000000 attr.1
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:349    .bss.sBuffer.0:0000000000000000 $d
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:353    .bss.sBuffer.0:0000000000000000 sBuffer.0
+/var/folders/lk/5zh__s8n5wg4b5gr7zz7z9lc0000gn/T//cch5Khz6.s:356    .bss.sensorI2C:0000000000000000 $d
+
+UNDEFINED SYMBOLS
+osSemaphoreNew
+hi2c3
+HAL_I2C_Master_Transmit
+HAL_I2C_Master_Receive_DMA
+osSemaphoreAcquire
+memset
+memcpy
+osSemaphoreRelease
